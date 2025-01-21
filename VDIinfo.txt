@@ -1,0 +1,3 @@
+My VDI hostname: AZW10SUSKW3734
+internal IP: 10.229.54.208 
+external link:  https://client.wvd.microsoft.com/arm/webclient/index.html
