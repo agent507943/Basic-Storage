@@ -1,0 +1,109 @@
+{
+  "labs": [
+    {
+      "title": "Basic Access Switch Configuration",
+      "description": "Configure VLANs, an SVI and assign access ports for a basic access switch.",
+      "steps": [
+        {
+          "title": "Create VLANs",
+          "description": "Create VLAN 10 (DATA) and VLAN 20 (VOICE) on the switch.",
+          "expected": ["vlan 10\nname DATA", "vlan 10\n name DATA", "vlan 10\nname DATA\n"],
+          "success_output": "VLAN 10 created."
+        },
+        {
+          "title": "Create SVI",
+          "description": "Create SVI interface vlan 10 and assign IP 10.0.10.2/24.",
+          "expected": ["interface vlan 10\n ip address 10.0.10.2 255.255.255.0", "interface vlan 10\nip address 10.0.10.2 255.255.255.0"],
+          "success_output": "SVI for VLAN 10 created with IP 10.0.10.2/24."
+        },
+        {
+          "title": "Assign Access Port",
+          "description": "Configure interface GigabitEthernet0/1 as access for VLAN 10.",
+          "expected": ["interface gigabitEthernet0/1\n switchport mode access\n switchport access vlan 10", "interface gigabitEthernet0/1\nswitchport mode access\nswitchport access vlan 10"],
+          "success_output": "Port Gi0/1 configured as access VLAN 10."
+        }
+      ]
+    },
+    {
+      "title": "Router-on-a-Stick with DHCP",
+      "description": "Configure a router subinterface, dot1q encapsulation and DHCP pool for a VLAN.",
+      "steps": [
+        {
+          "title": "Create subinterface",
+          "description": "Create GigabitEthernet0/0.10 with encapsulation dot1Q 10 and IP 10.0.10.1/24.",
+          "expected": ["interface gigabitEthernet0/0.10\nencapsulation dot1q 10\n ip address 10.0.10.1 255.255.255.0", "interface gigabitEthernet0/0.10\nencapsulation dot1q 10\nip address 10.0.10.1 255.255.255.0"],
+          "success_output": "Subinterface Gi0/0.10 created with IP 10.0.10.1/24."
+        },
+        {
+          "title": "Configure DHCP pool",
+          "description": "Create DHCP pool for 10.0.10.0/24 with default-router 10.0.10.1.",
+          "expected": ["ip dhcp pool DATA\n network 10.0.10.0 255.255.255.0\n default-router 10.0.10.1", "ip dhcp pool DATA\nnetwork 10.0.10.0 255.255.255.0\ndefault-router 10.0.10.1"],
+          "success_output": "DHCP pool DATA created for 10.0.10.0/24."
+        }
+      ]
+    }
+    ,
+    {
+      "title": "Firewall Policy: Allow Web and SSH to DMZ",
+      "description": "Create policies and NAT (if needed) to allow HTTP and SSH to a DMZ web and management host.",
+      "steps": [
+        {
+          "title": "Create inbound HTTP rule",
+          "description": "Add a rule permitting TCP 80 from outside to DMZ web server 198.51.100.10",
+          "expected": ["access-list OUT2DMZ permit tcp any host 198.51.100.10 eq 80", "access-list OUT2DMZ permit tcp any host 198.51.100.10 eq 80\n"],
+          "success_output": "HTTP allow rule created."
+        },
+        {
+          "title": "Create inbound SSH rule for mgmt subnet",
+          "description": "Permit SSH from 10.1.1.0/24 to management host 198.51.100.11",
+          "expected": ["access-list OUT2MGMT permit tcp 10.1.1.0 255.255.255.0 host 198.51.100.11 eq 22"],
+          "success_output": "SSH allow rule created."
+        }
+      ]
+    }
+    ,
+    {
+      "title": "DHCP Relay and Central Server",
+      "description": "Configure interface helper-addresses and create a central DHCP pool; validate with simulated client DHCP discovery.",
+      "steps": [
+        {
+          "title": "Configure helper on SVI",
+          "description": "On SVI VLAN 30 add helper to point at DHCP server 10.0.0.5",
+          "expected": ["interface vlan 30\n ip helper-address 10.0.0.5", "interface vlan 30\nip helper-address 10.0.0.5"],
+          "success_output": "Helper-address configured on VLAN 30."
+        },
+        {
+          "title": "Create central DHCP pool",
+          "description": "Create DHCP pool for 10.0.30.0/24 on server configuration (simulated)",
+          "expected": ["ip dhcp pool GUEST\n network 10.0.30.0 255.255.255.0\n default-router 10.0.30.1"],
+          "success_output": "Central DHCP pool created."
+        }
+      ]
+    }
+    ,
+    {
+      "title": "DNS Troubleshooting Lab",
+      "description": "Investigate a DNS resolution failure: query server, check firewall, and fix missing host record.",
+      "steps": [
+        {
+          "title": "Run a DNS query",
+          "description": "From client, run: nslookup www.example.com 10.0.0.5",
+          "expected": ["nslookup www.example.com 10.0.0.5", "dig @10.0.0.5 www.example.com"],
+          "success_output": "Query returned NXDOMAIN or no answer (expected for broken record)."
+        },
+        {
+          "title": "Add missing A record",
+          "description": "Add an A record for www.example.com pointing to 10.0.10.20 on the DNS server",
+          "expected": ["www IN A 10.0.10.20", "www A 10.0.10.20"],
+          "success_output": "A record added; DNS server reloaded."
+        },
+        {
+          "title": "Verify resolution",
+          "description": "Rerun the query and confirm the host now resolves",
+          "expected": ["nslookup www.example.com 10.0.0.5", "dig @10.0.0.5 www.example.com"],
+          "success_output": "DNS resolution now returns 10.0.10.20."
+        }
+      ]
+    }
+  ]
+}

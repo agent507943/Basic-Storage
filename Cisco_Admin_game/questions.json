@@ -1,0 +1,237 @@
+{
+  "questions": [
+    {
+      "difficulty": "easy",
+      "question": "What command shows the IP routing table on a Cisco IOS router?",
+      "choices": ["show ip route", "show running-config", "show interfaces", "show ip interface brief"],
+      "answer": "show ip route",
+      "explanation": "`show ip route` displays the routing table and learned routes from connected, static, and dynamic protocols."
+    },
+    {
+      "difficulty": "easy",
+      "question": "Which command displays interface status and IP addresses in brief form?",
+      "choices": ["show ip interface brief", "show interfaces status", "show run interface", "show ip route summary"],
+      "answer": "show ip interface brief",
+      "explanation": "`show ip interface brief` is commonly used to quickly verify interface IPs and up/down status."
+    },
+    {
+      "difficulty": "easy",
+      "question": "Which mode do you use to enter global configuration on a Cisco device?",
+      "choices": ["configure terminal", "enable", "interface", "privileged exec"],
+      "answer": "configure terminal",
+      "explanation": "From privileged EXEC (`#`) run `configure terminal` (or `conf t`) to enter global configuration mode."
+    },
+    {
+      "difficulty": "easy",
+      "question": "What command saves the running configuration to NVRAM?",
+      "choices": ["write memory", "show startup-config", "copy startup-config running-config", "clear running-config"],
+      "answer": "write memory",
+      "explanation": "`write memory` or `copy running-config startup-config` persists the running configuration to be used on next reboot."
+    },
+    {
+      "difficulty": "easy",
+      "question": "Which command shows the current VLAN database and VLAN names on a switch?",
+      "choices": ["show vlan brief", "show ip vlan", "show vlan switch", "show interfaces vlan"],
+      "answer": "show vlan brief",
+      "explanation": "`show vlan brief` lists VLAN IDs, names and member ports on many Cisco switches."
+    },
+    {
+      "difficulty": "easy",
+      "question": "How do you create an interface VLAN 10 SVI and give it an IP address?",
+      "choices": ["interface vlan 10\n ip address 10.0.10.1 255.255.255.0", "interface gigabitEthernet0/1\n switchport access vlan 10", "vlan 10\n name DATA", "ip route 10.0.10.0 255.255.255.0 10.0.0.1"],
+      "answer": "interface vlan 10\n ip address 10.0.10.1 255.255.255.0",
+      "explanation": "An SVI is configured under `interface vlan <id>` and assigned an IP for L3 SVI reachability."
+    },
+    {
+      "difficulty": "easy",
+      "question": "What is the default administrative distance of OSPF?",
+      "choices": ["110", "90", "120", "1"],
+      "answer": "110",
+      "explanation": "OSPF has an administrative distance of 110 by default."
+    },
+    {
+      "difficulty": "easy",
+      "question": "Which command configures a trunk on a switch interface (dot1q)?",
+      "choices": ["switchport mode trunk", "switchport mode access", "encapsulation dot1q", "ip address trunk"],
+      "answer": "switchport mode trunk",
+      "explanation": "`switchport mode trunk` sets an interface to carry multiple VLANs; `encapsulation dot1q` is used on router subinterfaces."
+    },
+    {
+      "difficulty": "easy",
+      "question": "Which command shows the spanning-tree root and port roles?",
+      "choices": ["show spanning-tree", "show stp status", "show spanning root", "show spanning-tree details"],
+      "answer": "show spanning-tree",
+      "explanation": "`show spanning-tree` shows root bridge, port roles, costs and STP state on VLANs."
+    },
+    {
+      "difficulty": "easy",
+      "question": "What command shows the neighbor relationships for OSPF?",
+      "choices": ["show ip ospf neighbor", "show ip ospf database", "show ip route ospf", "show ospf status"],
+      "answer": "show ip ospf neighbor",
+      "explanation": "This command lists OSPF neighbors and their adjacency states."
+    },
+
+    {
+      "difficulty": "medium",
+      "question": "How do you configure an access-list that permits HTTP and HTTPS from a subnet 10.0.1.0/24 to a server 10.0.2.10?",
+      "choices": ["ip access-list extended WEB\n permit tcp 10.0.1.0 0.0.0.255 host 10.0.2.10 eq 80\n permit tcp 10.0.1.0 0.0.0.255 host 10.0.2.10 eq 443", "access-list 100 permit tcp any host 10.0.2.10 eq 80 443", "ip access-list standard WEB\n permit 10.0.1.0 0.0.0.255", "ip nat inside source list 10 interface Gig0/0"],
+      "answer": "ip access-list extended WEB\n permit tcp 10.0.1.0 0.0.0.255 host 10.0.2.10 eq 80\n permit tcp 10.0.1.0 0.0.0.255 host 10.0.2.10 eq 443",
+      "explanation": "Extended ACLs allow matching on protocols and ports. Use `ip access-list extended` for named ACLs with multiple permit lines."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which commands configure EtherChannel (LACP) on two switch ports?",
+      "choices": ["interface range Gi0/1-2\n channel-group 1 mode active", "interface range Gi0/1-2\n channel-group 1 mode on", "interface port-channel 1\n switchport mode trunk", "interface Gi0/1\n channel-group 1 mode passive"],
+      "answer": "interface range Gi0/1-2\n channel-group 1 mode active",
+      "explanation": "Use `channel-group <num> mode active` to create an LACP group; matching settings and speeds must be equal on both ends."
+    },
+    {
+      "difficulty": "medium",
+      "question": "How do you redistribute OSPF into BGP (one-way) using route-maps to tag routes?",
+      "choices": ["router bgp 65000\n redistribute ospf 1 route-map OSPF-INTO-BGP", "router ospf 1\n redistribute bgp 65000 subnets", "ip route 0.0.0.0 0.0.0.0 null0", "bgp redistribute ospf 1"],
+      "answer": "router bgp 65000\n redistribute ospf 1 route-map OSPF-INTO-BGP",
+      "explanation": "In BGP config mode use `redistribute ospf` with a route-map to control and tag redistributed routes."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which command shows NAT translations on a Cisco IOS router?",
+      "choices": ["show ip nat translations", "show nat translations", "show ip nat statistics", "show ip translation"],
+      "answer": "show ip nat translations",
+      "explanation": "`show ip nat translations` lists active NAT translations and mappings."
+    },
+    {
+      "difficulty": "medium",
+      "question": "What is an important step before upgrading IOS on a production router?",
+      "choices": ["Take a backup of the running-config and boot image", "Clear the ARP table", "Disable routing protocols", "Remove all VLANs"],
+      "answer": "Take a backup of the running-config and boot image",
+      "explanation": "Always back up configs and boot images and verify free flash space and compatibility before upgrading."
+    },
+    {
+      "difficulty": "medium",
+      "question": "How do you configure a basic AAA local user and enable login authentication?",
+      "choices": ["username admin privilege 15 secret MyP@ss\n aaa new-model\n aaa authentication login default local", "enable secret MyP@ss\n login local", "line vty 0 4\n login local", "service password-encryption"],
+      "answer": "username admin privilege 15 secret MyP@ss\n aaa new-model\n aaa authentication login default local",
+      "explanation": "Create a local user and enable AAA `new-model` then define authentication to use the local database."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which show command gives BGP neighbor route counts and prefixes exchanged?",
+      "choices": ["show ip bgp summary", "show ip bgp neighbors", "show bgp routes all", "show ip bgp community"],
+      "answer": "show ip bgp summary",
+      "explanation": "`show ip bgp summary` provides neighbor states and prefix counts. For detailed info use `show ip bgp neighbors`."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which features help reduce convergence time and scale in large networks?",
+      "choices": ["Route summarization and LFA/fast-reroute", "Using large MTUs", "Enabling CDP globally", "Using static routes exclusively"],
+      "answer": "Route summarization and LFA/fast-reroute",
+      "explanation": "Summarization reduces routing table size; fast-reroute reduces failover time. Design choices improve scale and convergence."
+    },
+
+    {
+      "difficulty": "hard",
+      "question": "Describe a safe process to migrate hosts from VLAN 1 to VLAN 10 with minimal downtime on a production switch stack.",
+      "choices": ["Create VLAN 10, configure SVI, migrate access ports in small batches, update DHCP scopes, monitor ARP and connectivity", "Rename VLAN 1 to DATA, shut down the entire switch, change SVI", "Delete VLAN 1 and recreate VLANs", "Use VTP to push VLAN 10 globally without testing"],
+      "answer": "Create VLAN 10, configure SVI, migrate access ports in small batches, update DHCP scopes, monitor ARP and connectivity",
+      "explanation": "Renaming VLAN 1 is unsafe; best practice is to create a new VLAN, configure SVI, adjust DHCP, migrate ports in batches and carefully monitor."
+    },
+    {
+      "difficulty": "hard",
+      "question": "How would you implement policy-based routing to send traffic from a specific subnet to a backup ISP?",
+      "choices": ["Create an access-list matching the subnet, a route-map setting next-hop to backup ISP, and apply it with `ip policy route-map` on the ingress interface", "Modify the default route on the router", "Use NAT to change source address to backup ISP network", "Configure HSRP to change gateway"],
+      "answer": "Create an access-list matching the subnet, a route-map setting next-hop to backup ISP, and apply it with `ip policy route-map` on the ingress interface",
+      "explanation": "PBR uses route-maps with match and set clauses applied to inbound interfaces to override normal routing for selected traffic."
+    },
+    {
+      "difficulty": "hard",
+      "question": "Explain a design to achieve multi-tenant separation using VRFs and EVPN over an MPLS core.",
+      "choices": ["Use per-tenant VRFs at PE devices, advertise tenant routes via MP-BGP EVPN, use MPLS labels across core, and provide VRF-aware services at edge", "Use VLANs alone end-to-end across the core", "Use NAT to separate tenants", "Use static routes between VRFs"],
+      "answer": "Use per-tenant VRFs at PE devices, advertise tenant routes via MP-BGP EVPN, use MPLS labels across core, and provide VRF-aware services at edge",
+      "explanation": "VRF with EVPN/VXLAN or MP-BGP EVPN over MPLS provides tenant separation and scalable multi-tenancy; control-plane uses MP-BGP."
+    },
+    {
+      "difficulty": "hard",
+      "question": "How can you prevent route feedback loops when redistributing between OSPF and BGP?",
+      "choices": ["Use route-maps and route-tags to filter redistributed routes and avoid re-injecting the same routes back into the source protocol", "Redistribute all routes without tags", "Use static routes instead of redistribution", "Disable redistribution"],
+      "answer": "Use route-maps and route-tags to filter redistributed routes and avoid re-injecting the same routes back into the source protocol",
+      "explanation": "Tagging redistributed routes and filtering them prevents them from being redistributed back into the original protocol, avoiding loops."
+    },
+    {
+      "difficulty": "hard",
+      "question": "Design a migration plan to move from legacy CLI-based config backups to automated Git-based config management with validation checks.",
+      "choices": ["Automate config pulls to Git, implement pre-commit validation linting, use CI jobs to test configs in a staging sandbox, and implement RBAC for config changes", "Keep manual backups on TFTP and email configs", "Replace routers nightly without validation", "Store configs locally only"],
+      "answer": "Automate config pulls to Git, implement pre-commit validation linting, use CI jobs to test configs in a staging sandbox, and implement RBAC for config changes",
+      "explanation": "Modern automation pipelines include version control, validation, staged test deployments and RBAC to reduce risk and audit changes."
+    },
+    {
+      "difficulty": "hard",
+      "question": "What steps and show/debug commands do you use to troubleshoot intermittent BGP route loss to a neighbor?",
+      "choices": [
+        "Check show ip bgp summary and show ip bgp neighbors; inspect TCP resets and packet captures; verify route policies and route-refresh; review syslogs",
+        "Clear BGP sessions or reset neighbors only after analysis",
+        "Disable BGP and reconfigure OSPF instead",
+        "Reboot the router"
+      ],
+      "answer": "Check show ip bgp summary and show ip bgp neighbors; inspect TCP resets and packet captures; verify route policies and route-refresh; review syslogs",
+      "explanation": "Systematic troubleshooting uses summaries, neighbor details, TCP status, captures and log review before disruptive actions. Use debug commands carefully and with control-plane consideration."
+    }
+    ,
+    {
+      "difficulty": "easy",
+      "question": "Which command shows active DHCP leases on a Cisco IOS router?",
+      "choices": ["show ip dhcp binding", "show dhcp leases", "show ip leases", "show running-config | include dhcp"],
+      "answer": "show ip dhcp binding",
+      "explanation": "`show ip dhcp binding` lists active DHCP bindings (IP, MAC, lease time)."
+    },
+    {
+      "difficulty": "easy",
+      "question": "Which command configures a DHCP relay helper address on an interface?",
+      "choices": ["ip helper-address 10.0.0.5", "ip dhcp relay 10.0.0.5", "dhcp relay 10.0.0.5", "ip helper 10.0.0.5"],
+      "answer": "ip helper-address 10.0.0.5",
+      "explanation": "`ip helper-address` forwards client DHCP broadcasts to a centralized DHCP server."
+    },
+    {
+      "difficulty": "medium",
+      "question": "How do you create a basic inbound firewall rule to allow HTTP from the Internet to a DMZ web server on a stateful firewall (conceptual)?",
+      "choices": ["Permit tcp from any to 198.51.100.10 eq 80; apply to outside->dmz policy", "Permit ip any any; apply to outside", "Deny ip any any; then add permit for web", "Configure NAT only"],
+      "answer": "Permit tcp from any to 198.51.100.10 eq 80; apply to outside->dmz policy",
+      "explanation": "Stateful firewalls require explicit permit rules from source to destination/service and directionally applied policies."
+    },
+    {
+      "difficulty": "medium",
+      "type": "cli",
+      "question": "On a Cisco ASA/FTD style device, create a named access-list to permit SSH from management subnet 10.1.1.0/24 to any inside host.",
+      "accepted_answers": [
+        "access-list MGMT permit tcp 10.1.1.0 255.255.255.0 any eq 22",
+        "access-list MGMT permit tcp 10.1.1.0 255.255.255.0 any eq 22\n"
+      ],
+      "answer": "access-list MGMT permit tcp 10.1.1.0 255.255.255.0 any eq 22",
+      "explanation": "Named ACLs on ASA/FTD use `access-list <name> permit|deny` followed by protocol/source/mask/destination and port."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which DNS record type maps a hostname to an IPv6 address?",
+      "choices": ["AAAA", "A", "CNAME", "PTR"],
+      "answer": "AAAA",
+      "explanation": "An `AAAA` record contains an IPv6 address for a hostname."
+    },
+    {
+      "difficulty": "hard",
+      "type": "cli",
+      "question": "Configure a DHCP pool named VOICE for network 10.0.20.0/24 with default-router 10.0.20.1 and option 150 10.0.0.10 (TFTP).",
+      "accepted_answers": [
+        "ip dhcp pool VOICE\n network 10.0.20.0 255.255.255.0\n default-router 10.0.20.1\n option 150 ip 10.0.0.10",
+        "ip dhcp pool VOICE\nnetwork 10.0.20.0 255.255.255.0\ndefault-router 10.0.20.1\noption 150 ip 10.0.0.10"
+      ],
+      "answer": "ip dhcp pool VOICE\n network 10.0.20.0 255.255.255.0\n default-router 10.0.20.1\n option 150 ip 10.0.0.10",
+      "explanation": "DHCP pools are configured with `ip dhcp pool <name>` and include network, default-router and option 150 for phone TFTP servers."
+    },
+    {
+      "difficulty": "hard",
+      "question": "Describe how you would validate DNS resolution for a service from a client and trace related firewall rules that might block it.",
+      "choices": ["Use dig/nslookup to query the DNS server, then use packet captures and firewall logs to identify blocked DNS or TCP/UDP 53 traffic", "Restart the client only", "Clear DNS cache on the client and assume fixed", "Disable firewall temporarily"],
+      "answer": "Use dig/nslookup to query the DNS server, then use packet captures and firewall logs to identify blocked DNS or TCP/UDP 53 traffic",
+      "explanation": "Troubleshooting DNS involves verifying resolution, checking server responses, and reviewing firewall logs and captures for blocked queries."
+    }
+  ]
+}
