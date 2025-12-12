@@ -125,7 +125,11 @@ class CiscoAdminGame(tk.Tk):
         right.pack(side='left', fill='both', expand=True, padx=6, pady=6)
         self.lab_title = ttk.Label(right, text='Select a lab and click Start Lab', font=('Segoe UI', 12, 'bold'))
         self.lab_title.pack(anchor='w')
-        ttk.Button(right, text='Open Lab Markdown (.md)', command=self.open_lab_markdown).pack(anchor='w', pady=(4,0))
+        # Buttons for opening lab documentation
+        btn_frame = ttk.Frame(right)
+        btn_frame.pack(anchor='w', pady=(4,0))
+        ttk.Button(btn_frame, text='Open Lab Markdown (.md)', command=self.open_lab_markdown).pack(side='left', padx=(0,4))
+        ttk.Button(btn_frame, text='Open Lab HTML (.html)', command=self.open_lab_html).pack(side='left')
         # Diagram canvas
         self.lab_canvas = tk.Canvas(right, height=200, bg='white')
         self.lab_canvas.pack(fill='x', pady=(6,4))
@@ -786,6 +790,31 @@ class CiscoAdminGame(tk.Tk):
                 webbrowser.open(path)
         except Exception as e:
             messagebox.showerror('Error', f'Failed to create/open markdown: {e}')
+
+    def open_lab_html(self):
+        """Open the lab HTML file in the system default browser."""
+        lab = getattr(self, 'current_lab', None)
+        if not lab:
+            messagebox.showwarning('No Lab', 'Start a lab first to open its HTML file.')
+            return
+        try:
+            # Get the filename base from lab title
+            title = lab.get('title', 'lab').strip().lower()
+            safe_name = re.sub(r'[^a-z0-9_-]+', '_', title)
+            html_path = os.path.join(BASE_DIR, 'labs_md', safe_name + '.html')
+            
+            if not os.path.exists(html_path):
+                messagebox.showwarning('Not Found', f'HTML file not found:\n{html_path}\n\nTry opening the Markdown file first.')
+                return
+            
+            # Open with default browser/program
+            try:
+                os.startfile(html_path)
+            except AttributeError:
+                import webbrowser
+                webbrowser.open(html_path)
+        except Exception as e:
+            messagebox.showerror('Error', f'Failed to open HTML file: {e}')
 
     def next_question(self):
         # move to next question (called after submit and explanation optional)
