@@ -809,3 +809,117 @@ show interfaces status | include notconnect
 ---
 
 This guide is a concise companion to the in-app Study tab; the game includes quizzes and scenario-based questions to reinforce these commands and patterns.
+
+---
+
+## Lab Scenario: Reach the DNS Server from PC-PT Data
+
+This walkthrough covers every device and command needed so that **PC-PT Data** (VLAN 1 on the left switch) can ping **Server-PT** (VLAN 2 on the right switch) hosting DNS (`192.168.2.10`).
+
+### Switch 1 (left, VLAN separation)
+```
+enable
+configure terminal
+vlan 1
+ name DATA
+vlan 2
+ name MANAGEMENT
+interface GigabitEthernet0/1
+ switchport mode access
+ switchport access vlan 1
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 2
+interface GigabitEthernet0/24
+ switchport mode trunk
+ switchport trunk allowed vlan 1,2
+ no shutdown
+exit
+```
+
+### Router 1 (left router linking VLAN 1 to Router 2)
+```
+enable
+configure terminal
+interface GigabitEthernet0/1
+ description Link to Switch1
+ ip address 192.168.1.3 255.255.255.0
+ no shutdown
+interface GigabitEthernet0/0
+ description Link to Router2
+ ip address 10.0.0.1 255.255.255.252
+ no shutdown
+ip route 192.168.2.0 255.255.255.0 10.0.0.2
+ip route 192.168.3.0 255.255.255.0 10.0.0.2
+ip route 192.168.4.0 255.255.255.0 10.0.0.2
+```
+
+### Router 2 (right, toward DNS server)
+```
+enable
+configure terminal
+interface GigabitEthernet0/0
+ description Link to Router1
+ ip address 10.0.0.2 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/1
+ description Link to Switch2
+ ip address 192.168.2.3 255.255.255.0
+ no shutdown
+interface GigabitEthernet0/2
+ description DNS Server VLAN
+ ip address 192.168.2.1 255.255.255.0
+ no shutdown
+ip route 192.168.1.0 255.255.255.0 10.0.0.1
+ip route 192.168.3.0 255.255.255.0 10.0.0.1
+ip route 192.168.4.0 255.255.255.0 10.0.0.1
+```
+
+### Switch 2 (right, server + second PCs)
+```
+enable
+configure terminal
+vlan 1
+ name DATA
+vlan 2
+ name MANAGEMENT
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 1
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 2
+interface GigabitEthernet0/2
+ switchport mode trunk
+ switchport trunk allowed vlan 1,2
+exit
+```
+
+### Server-PT (DNS)
+- IP: `192.168.2.10/24`
+- Gateway: `192.168.2.1`
+- DNS entry: `www.bhclab.edu -> 192.168.2.10`
+Enable DNS service and ensure the server responds to ICMP and DNS queries.
+
+### PC-PT Data (VLAN 1)
+- IP: `192.168.1.10/24`
+- Gateway: `192.168.1.3`
+- DNS: `192.168.2.10`
+Static or DHCP address; ensure the DHCP pool points to Router1 as gateway and DNS server.
+
+### Verification Commands
+```
+ping 192.168.2.10       # Server
+ping 10.0.0.2           # Router2
+nslookup www.bhclab.edu 192.168.2.10
+tracert 192.168.2.10    # Windows PC tracing
+show ip route           # on both routers
+show interfaces status  # on switches
+show access-lists       # if ACLs applied
+```
+
+Once VLANs, routes, and addresses match the above, PC-PT Data will successfully ping Server-PT and resolve DNS requests through `www.bhclab.edu`.

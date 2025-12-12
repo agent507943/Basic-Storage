@@ -232,6 +232,76 @@
       "choices": ["Use dig/nslookup to query the DNS server, then use packet captures and firewall logs to identify blocked DNS or TCP/UDP 53 traffic", "Restart the client only", "Clear DNS cache on the client and assume fixed", "Disable firewall temporarily"],
       "answer": "Use dig/nslookup to query the DNS server, then use packet captures and firewall logs to identify blocked DNS or TCP/UDP 53 traffic",
       "explanation": "Troubleshooting DNS involves verifying resolution, checking server responses, and reviewing firewall logs and captures for blocked queries."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which command enables OSPF process 10 and advertises network 192.168.10.0/24 in area 0?",
+      "choices": ["router ospf 10\n network 192.168.10.0 0.0.0.255 area 0", "router ospf 1\n network 192.168.10.0 255.255.255.0 area 0", "router ospf 10\n network 192.168.10.0 255.255.255.0 area 0", "router ospf 10\n network 192.168.10.0 0.0.255.255 area 0"],
+      "answer": "router ospf 10\n network 192.168.10.0 0.0.0.255 area 0",
+      "explanation": "The wildcard mask 0.0.0.255 matches a /24. OSPF process 10 is started with 'router ospf 10'."
+    },
+    {
+      "difficulty": "medium",
+      "question": "What is the effect of the command 'switchport port-security violation restrict'?",
+      "choices": ["Drops violating traffic and increments counter, but does not shut the port", "Disables the port on violation", "Allows all traffic", "Logs but does not drop packets"],
+      "answer": "Drops violating traffic and increments counter, but does not shut the port",
+      "explanation": "'restrict' mode drops unauthorized frames, increments violation counter, and can send SNMP/log messages."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which command sets a router's loopback0 interface as the OSPF router ID?",
+      "choices": ["router ospf 1\n router-id 1.1.1.1", "interface loopback0\n ip ospf router-id 1.1.1.1", "router ospf 1\n network 1.1.1.1 0.0.0.0 area 0", "ip ospf router-id 1.1.1.1"],
+      "answer": "router ospf 1\n router-id 1.1.1.1",
+      "explanation": "The 'router-id' command under OSPF process sets the router ID explicitly."
+    },
+    {
+      "difficulty": "medium",
+      "question": "How do you configure a static NAT mapping for inside host 10.0.0.10 to outside 203.0.113.10?",
+      "choices": ["ip nat inside source static 10.0.0.10 203.0.113.10", "ip nat outside source static 10.0.0.10 203.0.113.10", "ip nat inside source list 10 interface Gig0/0 overload", "ip nat translation static 10.0.0.10 203.0.113.10"],
+      "answer": "ip nat inside source static 10.0.0.10 203.0.113.10",
+      "explanation": "This command creates a one-to-one static NAT mapping from inside to outside address."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which command enables SNMPv2c with community 'MONRO' and restricts access to RO?",
+      "choices": ["snmp-server community MONRO RO", "snmp-server enable MONRO", "snmp-server community MONRO RW", "snmp-server host MONRO"],
+      "answer": "snmp-server community MONRO RO",
+      "explanation": "The 'RO' keyword restricts SNMP access to read-only."
+    },
+    {
+      "difficulty": "medium",
+      "question": "How do you configure a switch to use RADIUS server 10.0.0.5 for login authentication?",
+      "choices": ["aaa new-model\n radius-server host 10.0.0.5\n aaa authentication login default group radius local", "radius-server host 10.0.0.5\n login authentication radius", "aaa authentication radius 10.0.0.5", "enable radius-server 10.0.0.5"],
+      "answer": "aaa new-model\n radius-server host 10.0.0.5\n aaa authentication login default group radius local",
+      "explanation": "'aaa new-model' enables AAA, then specify the RADIUS server and set login authentication."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which command enables DHCP snooping globally and on VLAN 10?",
+      "choices": ["ip dhcp snooping\n ip dhcp snooping vlan 10", "ip dhcp snooping enable\n vlan 10", "dhcp snooping vlan 10\n ip dhcp snooping", "ip dhcp snooping trust vlan 10"],
+      "answer": "ip dhcp snooping\n ip dhcp snooping vlan 10",
+      "explanation": "Enable globally, then specify VLANs to protect."
+    },
+    {
+      "difficulty": "medium",
+      "question": "What is the effect of 'spanning-tree portfast' on an access port?",
+      "choices": ["Port transitions to forwarding state immediately, skipping listening/learning", "Port disables spanning-tree", "Port becomes trunk", "Port is administratively shut down"],
+      "answer": "Port transitions to forwarding state immediately, skipping listening/learning",
+      "explanation": "PortFast is used on access ports to avoid delays for end devices."
+    },
+    {
+      "difficulty": "medium",
+      "question": "Which command configures a router to send syslog messages to 192.168.1.100 with informational severity?",
+      "choices": ["logging host 192.168.1.100\n logging trap informational", "syslog server 192.168.1.100\n logging informational", "logging 192.168.1.100\n logging severity 6", "logging host 192.168.1.100\n logging severity informational"],
+      "answer": "logging host 192.168.1.100\n logging trap informational",
+      "explanation": "'logging host' sets the destination, 'logging trap' sets the minimum severity."
+    },
+    {
+      "difficulty": "medium",
+      "question": "How do you configure a switchport to allow only VLANs 10 and 20 on a trunk?",
+      "choices": ["switchport trunk allowed vlan 10,20", "switchport trunk allowed vlan all", "switchport mode access vlan 10,20", "switchport trunk allowed vlan except 10,20"],
+      "answer": "switchport trunk allowed vlan 10,20",
+      "explanation": "This command restricts the trunk to only carry VLANs 10 and 20."
     }
   ]
 }

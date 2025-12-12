@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Configure and Verify EtherChannel (LACP)</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333; }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .difficulty { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-bottom: 15px; background: #ffe082; color: #7c4700; }
+    .mermaid { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+    .description { background: #e8f4f8; padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid #1a5f7a; }
+    .step { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 15px; margin: 15px 0; }
+    .step h3 { margin-top: 0; color: #1a5f7a; }
+    .expected { background: #f0f7f0; padding: 12px; border-radius: 4px; margin-top: 10px; }
+    .expected strong { color: #27ae60; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9em; }
+    pre { background: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated { background: #fff3cd; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ffc107; }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 } });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>Configure and Verify EtherChannel (LACP)</h1>
+<span class="difficulty">Medium Level</span><div class="description"><strong>Goal:</strong> Bundle two switch ports using LACP, verify EtherChannel status, and test failover.</div><h2>Network Diagram</h2><div class="mermaid">
+graph TD
+    Router1["Router"] --> Switch1["Switch"]
+    Switch1 --> PC1["PC"]
+</div><h2>Lab Steps</h2><div class="step"><h3>Step 1: Configure EtherChannel</h3>
+<p>Set Gi0/1 and Gi0/2 to LACP active and bundle as Port-Channel 1.</p>
+<div class="expected"><strong>Expected Commands:</strong><ul>
+<li><code>interface range gi0/1-2</code></li>
+<li><code>channel-group 1 mode active</code></li>
+</ul></div>
+</div>
+<div class="step"><h3>Step 2: Verify EtherChannel</h3>
+<p>Check EtherChannel summary and port status.</p>
+<div class="expected"><strong>Expected Commands:</strong><ul>
+<li><code>show etherchannel summary</code></li>
+</ul></div>
+</div>
+<div class="step"><h3>Step 3: Test failover</h3>
+<p>Shut down Gi0/2 and verify traffic continues on Gi0/1.</p>
+<div class="expected"><strong>Expected Commands:</strong><ul>
+<li><code>interface gi0/2</code></li>
+<li><code>shutdown</code></li>
+<li><code>show etherchannel summary</code></li>
+</ul></div>
+</div><h2>Simulated Outputs</h2><div class="simulated"><ul><li><code>show etherchannel summary</code> &rarr; <code>Group  Port-channel  Protocol    Ports
+1      Po1(SU)         LACP      Gi0/1(P) Gi0/2(P)</code></li></ul></div>
+</body>
+</html>

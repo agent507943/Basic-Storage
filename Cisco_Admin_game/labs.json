@@ -610,6 +610,117 @@
         "show interface gi0/0": "GigabitEthernet0/0 is up, line protocol is up\\n  Hardware is Gigabit Ethernet\\n  Internet address is 192.168.1.1/24\\n  MTU 1500 bytes, BW 1000000 Kbit\\n  Full-duplex, 1000Mb/s\\n  5 minute input rate 1000 bits/sec\\n  0 input errors, 0 CRC, 0 frame",
         "show ip interface gi0/0": "GigabitEthernet0/0 is up, line protocol is up\\n  Internet address is 192.168.1.1/24\\n  Broadcast address is 255.255.255.255"
       }
+    },
+    {
+      "title": "Configure OSPF on Multiple Routers",
+      "difficulty": "medium",
+      "description": "Set up OSPF on two routers, advertise directly connected networks, and verify neighbor adjacency.",
+      "steps": [
+        {"title": "Enable OSPF and advertise networks on R1", "description": "Start OSPF process 1 and advertise 10.0.1.0/24 and 10.0.2.0/24.", "expected": ["router ospf 1", "network 10.0.1.0 0.0.0.255 area 0", "network 10.0.2.0 0.0.0.255 area 0"], "success_output": "OSPF enabled and networks advertised on R1."},
+        {"title": "Enable OSPF and advertise networks on R2", "description": "Start OSPF process 1 and advertise 10.0.2.0/24 and 10.0.3.0/24.", "expected": ["router ospf 1", "network 10.0.2.0 0.0.0.255 area 0", "network 10.0.3.0 0.0.0.255 area 0"], "success_output": "OSPF enabled and networks advertised on R2."},
+        {"title": "Verify OSPF neighbor adjacency", "description": "Check that R1 and R2 are OSPF neighbors.", "expected": ["show ip ospf neighbor"], "success_output": "OSPF neighbor adjacency established."}
+      ],
+      "simulated": {"show ip ospf neighbor": "Neighbor ID     Pri   State           Dead Time   Address         Interface\n10.0.2.2        1     FULL/DR         00:00:33    10.0.2.2        Gi0/1"}
+    },
+    {
+      "title": "Configure DHCP Snooping and Trust",
+      "difficulty": "medium",
+      "description": "Enable DHCP snooping globally, configure trusted and untrusted ports, and verify operation.",
+      "steps": [
+        {"title": "Enable DHCP snooping globally", "description": "Turn on DHCP snooping and specify VLAN 10.", "expected": ["ip dhcp snooping", "ip dhcp snooping vlan 10"], "success_output": "DHCP snooping enabled for VLAN 10."},
+        {"title": "Configure trusted port", "description": "Set Gi0/1 as trusted (uplink to DHCP server).", "expected": ["interface gi0/1", "ip dhcp snooping trust"], "success_output": "Gi0/1 set as trusted."},
+        {"title": "Configure untrusted port", "description": "Set Gi0/2 as untrusted (user port).", "expected": ["interface gi0/2", "no ip dhcp snooping trust"], "success_output": "Gi0/2 set as untrusted."},
+        {"title": "Verify DHCP snooping", "description": "Check the DHCP snooping binding table.", "expected": ["show ip dhcp snooping binding"], "success_output": "DHCP snooping binding table displayed."}
+      ],
+      "simulated": {"show ip dhcp snooping binding": "MacAddress          IpAddress      Lease      Type       VLAN  Interface\n0011.2233.4455      10.0.10.11     3600       dhcp-snooping  10   Gi0/2"}
+    },
+    {
+      "title": "Configure RADIUS Authentication for Switch Login",
+      "difficulty": "medium",
+      "description": "Set up AAA and RADIUS server authentication for switch console and VTY access.",
+      "steps": [
+        {"title": "Enable AAA and add RADIUS server", "description": "Enable AAA and add RADIUS server 10.0.0.5.", "expected": ["aaa new-model", "radius-server host 10.0.0.5 key radiuskey"], "success_output": "AAA enabled and RADIUS server added."},
+        {"title": "Configure login authentication", "description": "Set default login to use RADIUS, fallback to local.", "expected": ["aaa authentication login default group radius local"], "success_output": "Login authentication set to RADIUS then local."},
+        {"title": "Apply to console and VTY", "description": "Apply authentication to console and VTY lines.", "expected": ["line console 0", "login authentication default", "line vty 0 4", "login authentication default"], "success_output": "Authentication applied to console and VTY."}
+      ],
+      "simulated": {"show running-config | include radius": "radius-server host 10.0.0.5 key radiuskey"}
+    },
+    {
+      "title": "Configure and Verify EtherChannel (LACP)",
+      "difficulty": "medium",
+      "description": "Bundle two switch ports using LACP, verify EtherChannel status, and test failover.",
+      "steps": [
+        {"title": "Configure EtherChannel", "description": "Set Gi0/1 and Gi0/2 to LACP active and bundle as Port-Channel 1.", "expected": ["interface range gi0/1-2", "channel-group 1 mode active"], "success_output": "EtherChannel configured using LACP."},
+        {"title": "Verify EtherChannel", "description": "Check EtherChannel summary and port status.", "expected": ["show etherchannel summary"], "success_output": "EtherChannel summary displayed."},
+        {"title": "Test failover", "description": "Shut down Gi0/2 and verify traffic continues on Gi0/1.", "expected": ["interface gi0/2", "shutdown", "show etherchannel summary"], "success_output": "Failover successful; traffic continues on remaining link."}
+      ],
+      "simulated": {"show etherchannel summary": "Group  Port-channel  Protocol    Ports\n1      Po1(SU)         LACP      Gi0/1(P) Gi0/2(P)"}
+    },
+    {
+      "title": "Configure and Test Portfast and BPDU Guard",
+      "difficulty": "medium",
+      "description": "Enable Portfast on access ports and BPDU Guard to protect against accidental loops.",
+      "steps": [
+        {"title": "Enable Portfast", "description": "Enable spanning-tree portfast on Gi0/3.", "expected": ["interface gi0/3", "spanning-tree portfast"], "success_output": "Portfast enabled on Gi0/3."},
+        {"title": "Enable BPDU Guard", "description": "Enable BPDU Guard on Gi0/3.", "expected": ["spanning-tree bpduguard enable"], "success_output": "BPDU Guard enabled on Gi0/3."},
+        {"title": "Test BPDU Guard", "description": "Simulate BPDU received and verify port is err-disabled.", "expected": ["show interfaces status"], "success_output": "Gi0/3 is err-disabled after BPDU received."}
+      ],
+      "simulated": {"show interfaces status": "Gi0/3  err-disabled  1G  a-full  a-100  10/100/1000BaseTX"}
+    },
+    {
+      "title": "Configure and Test HSRP for Gateway Redundancy",
+      "difficulty": "medium",
+      "description": "Set up HSRP on two routers for VLAN 10, verify failover, and test virtual IP.",
+      "steps": [
+        {"title": "Configure HSRP on R1", "description": "Set standby group 10, virtual IP 10.0.10.1, priority 110.", "expected": ["interface vlan 10", "ip address 10.0.10.2 255.255.255.0", "standby 10 ip 10.0.10.1", "standby 10 priority 110"], "success_output": "HSRP configured on R1."},
+        {"title": "Configure HSRP on R2", "description": "Set standby group 10, virtual IP 10.0.10.1, priority 100.", "expected": ["interface vlan 10", "ip address 10.0.10.3 255.255.255.0", "standby 10 ip 10.0.10.1", "standby 10 priority 100"], "success_output": "HSRP configured on R2."},
+        {"title": "Test failover", "description": "Shut down R1's VLAN 10 and verify R2 takes over.", "expected": ["interface vlan 10", "shutdown", "show standby"], "success_output": "R2 is now active for standby group 10."}
+      ],
+      "simulated": {"show standby": "Group 10\n  State is Active\n  Virtual IP address is 10.0.10.1"}
+    },
+    {
+      "title": "Configure and Test Extended ACL for Web Restriction",
+      "difficulty": "medium",
+      "description": "Create an extended ACL to block HTTP/HTTPS from a subnet to the internet, permit all else, and verify.",
+      "steps": [
+        {"title": "Create extended ACL", "description": "Block TCP 80/443 from 10.1.1.0/24 to any, permit all else.", "expected": ["ip access-list extended BLOCK_WEB", "deny tcp 10.1.1.0 0.0.0.255 any eq 80", "deny tcp 10.1.1.0 0.0.0.255 any eq 443", "permit ip any any"], "success_output": "Extended ACL created."},
+        {"title": "Apply ACL to interface", "description": "Apply to outbound interface toward internet.", "expected": ["interface gi0/0", "ip access-group BLOCK_WEB out"], "success_output": "ACL applied to outbound interface."},
+        {"title": "Verify ACL", "description": "Test HTTP/HTTPS and other traffic from 10.1.1.0/24.", "expected": ["curl http://example.com", "curl https://example.com", "ping 8.8.8.8"], "success_output": "HTTP/HTTPS blocked, ping allowed."}
+      ],
+      "simulated": {"curl http://example.com": "Connection refused", "curl https://example.com": "Connection refused", "ping 8.8.8.8": "!!!!!"}
+    },
+    {
+      "title": "Configure and Test Syslog with Severity Filtering",
+      "difficulty": "medium",
+      "description": "Configure a router to send syslog messages to a server, set severity to warnings and above, and verify logs.",
+      "steps": [
+        {"title": "Configure syslog server", "description": "Set logging host to 192.168.1.100 and trap level to warnings.", "expected": ["logging host 192.168.1.100", "logging trap warnings"], "success_output": "Syslog server and severity set."},
+        {"title": "Generate test log", "description": "Shut down an interface to generate a warning.", "expected": ["interface gi0/1", "shutdown"], "success_output": "Interface shut, log generated."},
+        {"title": "Verify logs on server", "description": "Check syslog server for warning message.", "expected": ["show logging"], "success_output": "Warning log present on server."}
+      ],
+      "simulated": {"show logging": "%LINK-5-CHANGED: Interface Gi0/1, changed state to administratively down"}
+    },
+    {
+      "title": "Configure and Test Static Route with Floating Backup",
+      "difficulty": "medium",
+      "description": "Configure a static route with a higher administrative distance as a backup to a dynamic route.",
+      "steps": [
+        {"title": "Configure primary dynamic route", "description": "Enable OSPF and advertise 10.0.10.0/24.", "expected": ["router ospf 1", "network 10.0.10.0 0.0.0.255 area 0"], "success_output": "OSPF route in table."},
+        {"title": "Configure floating static route", "description": "Add static route to 10.0.10.0/24 via backup next-hop with AD 200.", "expected": ["ip route 10.0.10.0 255.255.255.0 192.168.1.2 200"], "success_output": "Floating static route added."},
+        {"title": "Test failover", "description": "Shut OSPF neighbor and verify static route is used.", "expected": ["interface gi0/2", "shutdown", "show ip route"], "success_output": "Static route now active in table."}
+      ],
+      "simulated": {"show ip route": "S* 10.0.10.0/24 [200/0] via 192.168.1.2"}
+    },
+    {
+      "title": "Configure and Test NTP Authentication",
+      "difficulty": "medium",
+      "description": "Set up NTP with authentication key, configure trusted key, and verify time sync.",
+      "steps": [
+        {"title": "Configure NTP authentication", "description": "Set key 1 with password, mark as trusted.", "expected": ["ntp authentication-key 1 md5 NtpSecret", "ntp trusted-key 1"], "success_output": "NTP authentication key set and trusted."},
+        {"title": "Configure NTP server with key", "description": "Set NTP server 192.168.1.100 to use key 1.", "expected": ["ntp server 192.168.1.100 key 1"], "success_output": "NTP server set with authentication."},
+        {"title": "Verify NTP sync", "description": "Check NTP status and associations.", "expected": ["show ntp status", "show ntp associations"], "success_output": "NTP synchronized with authentication."}
+      ],
+      "simulated": {"show ntp status": "Clock is synchronized, stratum 2, reference is 192.168.1.100", "show ntp associations": "*~192.168.1.100 .INIT. 1 64 377 0.123 0.000 0.001"}
     }
   ]
 }
