@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Static Routing Fundamentals</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .beginner { background: #d4edda; color: #155724; }
+    .mermaid {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .description {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #1a5f7a;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1a5f7a;
+    }
+    .expected {
+      background: #f0f7f0;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .expected strong { color: #27ae60; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'default',
+          flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>Static Routing Fundamentals</h1>
+<span class="difficulty beginner">Beginner Level</span>
+<div class="description"><strong>Goal:</strong> Configure static routes on a router to enable communication between two networks that are not directly connected.</div>
+<h2>Network Diagram</h2>
+<div class="mermaid">
+graph LR
+    subgraph LAN_A["LAN A: 192.168.1.0/24"]
+        PCA["🖥️ PC-A<br/>192.168.1.10"]
+    end
+    subgraph WAN["WAN Link: 10.0.0.0/24"]
+        R1["📡 Router-1<br/>.1.1 | 10.0.0.1"]
+        R2["📡 Router-2<br/>10.0.0.2 | .2.1"]
+    end
+    subgraph LAN_B["LAN B: 192.168.2.0/24"]
+        PCB["🖥️ PC-B<br/>192.168.2.10"]
+    end
+    PCA --> R1
+    R1 <-->|"Static Routes"| R2
+    R2 --> PCB
+</div>
+<h2>Lab Steps</h2>
+<div class="step">
+<h3>Step 1: View the routing table</h3>
+<p>On Router-1, display the current routing table to see directly connected networks.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show ip route</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 2: Add static route on Router-1</h3>
+<p>Configure a static route to reach the 192.168.2.0/24 network via Router-2's interface (10.0.0.2).</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>ip route 192.168.2.0 255.255.255.0 10.0.0.2</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 3: Add static route on Router-2</h3>
+<p>Configure a static route to reach the 192.168.1.0/24 network via Router-1's interface (10.0.0.1).</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>ip route 192.168.1.0 255.255.255.0 10.0.0.1</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 4: Verify routing table</h3>
+<p>Check the routing table on Router-1 to confirm the static route is present (marked with 'S').</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show ip route</code></li>
+<li><code>show ip route static</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 5: Test connectivity</h3>
+<p>From Router-1, ping PC-B (192.168.2.10) to verify end-to-end connectivity.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>ping 192.168.2.10</code></li>
+</ul>
+</div>
+</div>
+<h2>Simulated Outputs</h2>
+<div class="simulated">
+<ul>
+<li><code>show ip route</code> &rarr; <code>C  192.168.1.0/24 is directly connected, Gi0/0<br/>C  10.0.0.0/24 is directly connected, Gi0/1<br/>S  192.168.2.0/24 [1/0] via 10.0.0.2</code></li>
+<li><code>show ip route static</code> &rarr; <code>S  192.168.2.0/24 [1/0] via 10.0.0.2</code></li>
+<li><code>ping 192.168.2.10</code> &rarr; <code>!!!!!<br/>Success rate is 100 percent (5/5)</code></li>
+</ul>
+</div>
+</body>
+</html>

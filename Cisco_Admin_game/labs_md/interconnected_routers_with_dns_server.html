@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interconnected Routers with DNS Server</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .mermaid {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .description {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #1a5f7a;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1a5f7a;
+    }
+    .expected {
+      background: #f0f7f0;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .expected strong { color: #27ae60; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'default',
+          flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>Interconnected Routers with DNS Server</h1>
+<div class="description"><strong>Goal:</strong> Goal: Configure two routers, connected by a routed link, each with a managed switch and two PCs. Router B's switch hosts a DNS server that must serve both networks.</div>
+<h2>Network Diagram</h2>
+<div class="mermaid">
+graph LR
+    subgraph Site_A["Site A - 10.0.10.0/24"]
+        RA["📡 Router-A"]
+        SWA["🔀 Switch-A"]
+        PCA1["🖥️ PC A1"]
+        PCA2["🖥️ PC A2"]
+    end
+    subgraph Site_B["Site B - 10.0.20.0/24"]
+        RB["📡 Router-B"]
+        SWB["🔀 Switch-B"]
+        DNS["🗄️ DNS Server<br/>10.0.20.10"]
+        PCB1["🖥️ PC B1"]
+        PCB2["🖥️ PC B2"]
+    end
+    RA <-->|"Routed Link"| RB
+    RA --> SWA
+    RB --> SWB
+    SWA --> PCA1
+    SWA --> PCA2
+    SWB --> DNS
+    SWB --> PCB1
+    SWB --> PCB2
+</div>
+<h2>Lab Steps</h2>
+<div class="step">
+<h3>Step 1: Configure VLANs on switches</h3>
+<p>On Sw-A create VLAN 10 and on Sw-B create VLAN 20. Assign PC access ports.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>vlan 10<br/> name DATA</code></li>
+<li><code>vlan 20<br/> name DATA</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 2: Configure router subinterfaces or SVIs</h3>
+<p>On Router-A create subinterface Gi0/0.10 (10.0.10.1/24). On Router-B create Gi0/0.20 (10.0.20.1/24). Configure encapsulation dot1q.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>interface gigabitEthernet0/0.10<br/> encapsulation dot1q 10<br/> ip address 10.0.10.1 255.255.255.0</code></li>
+<li><code>interface gigabitEthernet0/0.20<br/> encapsulation dot1q 20<br/> ip address 10.0.20.1 255.255.255.0</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 3: Configure routing between Router-A and Router-B</h3>
+<p>Add static routes or a routing protocol so 10.0.10.0/24 and 10.0.20.0/24 can reach each other.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>ip route 10.0.20.0 255.255.255.0 &lt;next-hop&gt;</code></li>
+<li><code>ip route 10.0.10.0 255.255.255.0 &lt;next-hop&gt;</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 4: Configure DNS server and records</h3>
+<p>On the DNS server add A records for hostnames in both VLANs and point to 10.0.20.10 (server IP).</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>www IN A 10.0.20.10</code></li>
+<li><code>hostA IN A 10.0.10.11</code></li>
+<li><code>hostB IN A 10.0.20.12</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 5: Validate from PCs</h3>
+<p>From PC A1 and PC B1 run: ping 10.0.20.10 and nslookup www.example.com 10.0.20.10</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>ping 10.0.20.10</code></li>
+<li><code>nslookup www.example.com 10.0.20.10</code></li>
+</ul>
+</div>
+</div>
+<h2>Simulated Outputs</h2>
+<div class="simulated">
+<ul>
+<li><code>ping 10.0.20.10</code> → <code>reply</code></li>
+<li><code>nslookup www.example.com 10.0.20.10</code> → <code>answer:10.0.20.10</code></li>
+</ul>
+</div>
+</body>
+</html>

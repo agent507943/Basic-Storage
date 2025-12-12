@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Backup and Restore Configuration</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .beginner { background: #d4edda; color: #155724; }
+    .mermaid {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .description {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #1a5f7a;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1a5f7a;
+    }
+    .expected {
+      background: #f0f7f0;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .expected strong { color: #27ae60; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'default',
+          flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>Backup and Restore Configuration</h1>
+<span class="difficulty beginner">Beginner Level</span>
+<div class="description"><strong>Goal:</strong> Learn to save, backup, and restore router/switch configurations using copy commands and a TFTP server.</div>
+<h2>Network Diagram</h2>
+<div class="mermaid">
+graph LR
+    Router["📡 Router"]
+    TFTP["🗄️ TFTP Server<br/>192.168.1.100"]
+    NVRAM["💾 NVRAM<br/>startup-config"]
+    Router -->|"copy run start"| NVRAM
+    Router <-->|"copy run tftp<br/>copy tftp run"| TFTP
+</div>
+<h2>Lab Steps</h2>
+<div class="step">
+<h3>Step 1: View running configuration</h3>
+<p>Display the current running configuration to review before backup.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show running-config</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 2: Save to startup-config</h3>
+<p>Copy the running configuration to startup-config (NVRAM) so it persists after reboot.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>copy running-config startup-config</code></li>
+<li><code>write memory</code></li>
+<li><code>wr</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 3: Backup to TFTP server</h3>
+<p>Copy the running configuration to a TFTP server at 192.168.1.100.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>copy running-config tftp://192.168.1.100/router-backup.cfg</code></li>
+<li><code>copy running-config tftp</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 4: View startup configuration</h3>
+<p>Verify the startup-config matches the running-config.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show startup-config</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 5: Restore from TFTP</h3>
+<p>Restore a configuration from the TFTP server to running-config.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>copy tftp://192.168.1.100/router-backup.cfg running-config</code></li>
+<li><code>copy tftp running-config</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 6: Erase startup-config (optional)</h3>
+<p>If needed, erase the startup configuration to reset the device to factory defaults.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>write erase</code></li>
+<li><code>erase startup-config</code></li>
+</ul>
+</div>
+</div>
+<h2>Simulated Outputs</h2>
+<div class="simulated">
+<ul>
+<li><code>show running-config</code> &rarr; <code>[Current configuration displayed]</code></li>
+<li><code>show startup-config</code> &rarr; <code>[Startup configuration displayed]</code></li>
+<li><code>copy running-config tftp://192.168.1.100/router-backup.cfg</code> &rarr; <code>Writing router-backup.cfg... [OK]</code></li>
+<li><code>copy tftp://192.168.1.100/router-backup.cfg running-config</code> &rarr; <code>Loading router-backup.cfg from 192.168.1.100... [OK]</code></li>
+</ul>
+</div>
+</body>
+</html>

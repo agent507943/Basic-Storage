@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IPsec Tunnel Verification</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .mermaid {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .description {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #1a5f7a;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1a5f7a;
+    }
+    .expected {
+      background: #f0f7f0;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .expected strong { color: #27ae60; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'default',
+          flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>IPsec Tunnel Verification</h1>
+<div class="description"><strong>Goal:</strong> Basic site-to-site IPsec tunnel bring-up and verification (pre-shared key example).</div>
+<h2>Network Diagram</h2>
+<div class="mermaid">
+graph LR
+    subgraph Site_A["Site A"]
+        RA["📡 Router-A<br/>Crypto Map"]
+        LAN_A["🖥️ LAN A"]
+    end
+    subgraph Site_B["Site B"]
+        RB["📡 Router-B<br/>198.51.100.2"]
+        LAN_B["🖥️ LAN B"]
+    end
+    LAN_A --> RA
+    RA <-->|"IPsec Tunnel<br/>ESP/IKE"| RB
+    RB --> LAN_B
+</div>
+<h2>Lab Steps</h2>
+<div class="step">
+<h3>Step 1: Define IKE/ISAKMP</h3>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>crypto isakmp policy 10</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 2: Set PSK and crypto map</h3>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>crypto isakmp key SECRET address 198.51.100.2</code></li>
+<li><code>crypto map CM 10 ipsec-isakmp</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 3: Verify tunnel</h3>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show crypto isakmp sa</code></li>
+<li><code>show crypto ipsec sa</code></li>
+</ul>
+</div>
+</div>
+<h2>Simulated Outputs</h2>
+<div class="simulated">
+<ul>
+<li><code>show crypto isakmp sa</code> → <code>MM_KEY_EXCHANGE State: QM_IDLE<br/>Peer 198.51.100.2</code></li>
+<li><code>show crypto ipsec sa</code> → <code>interface: GigabitEthernet0/0, Crypto map tag: CM, #pkts encaps: 10</code></li>
+</ul>
+</div>
+</body>
+</html>

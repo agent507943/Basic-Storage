@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 import json
+import re
 import os
 import random
 from datetime import datetime
@@ -10,6 +11,7 @@ QUESTIONS_FILE = os.path.join(BASE_DIR, 'questions.json')
 STUDY_FILE = os.path.join(BASE_DIR, 'study_content.md')
 SCORES_FILE = os.path.join(BASE_DIR, 'scores.json')
 LABS_FILE = os.path.join(BASE_DIR, 'labs.json')
+SCENARIOS_FILE = os.path.join(BASE_DIR, 'scenarios.json')
 
 class CiscoAdminGame(tk.Tk):
     def __init__(self):
@@ -123,7 +125,11 @@ class CiscoAdminGame(tk.Tk):
         right.pack(side='left', fill='both', expand=True, padx=6, pady=6)
         self.lab_title = ttk.Label(right, text='Select a lab and click Start Lab', font=('Segoe UI', 12, 'bold'))
         self.lab_title.pack(anchor='w')
-        self.lab_text = tk.Text(right, height=12, wrap='word')
+        ttk.Button(right, text='Open Lab Markdown (.md)', command=self.open_lab_markdown).pack(anchor='w', pady=(4,0))
+        # Diagram canvas
+        self.lab_canvas = tk.Canvas(right, height=200, bg='white')
+        self.lab_canvas.pack(fill='x', pady=(6,4))
+        self.lab_text = tk.Text(right, height=8, wrap='word')
         self.lab_text.pack(fill='both', expand=False, pady=(6,8))
         self.lab_step_label = ttk.Label(right, text='Step:')
         self.lab_step_label.pack(anchor='w')
@@ -135,6 +141,43 @@ class CiscoAdminGame(tk.Tk):
         self.labs = self.load_labs()
         for lab in self.labs:
             self.labs_listbox.insert(tk.END, lab.get('title'))
+
+        # Scenario Lookup tab - searchable scenario repository
+        scenarios_frame = ttk.Frame(notebook)
+        notebook.add(scenarios_frame, text='Scenario Lookup')
+        top_s = ttk.Frame(scenarios_frame)
+        top_s.pack(fill='x', padx=6, pady=(6,2))
+        ttk.Label(top_s, text='Search Scenarios:').pack(side='left')
+        self.scenario_search_var = tk.StringVar()
+        self.scenario_search_entry = ttk.Entry(top_s, textvariable=self.scenario_search_var, width=50)
+        self.scenario_search_entry.pack(side='left', padx=(6,4))
+        ttk.Button(top_s, text='Find', command=self.search_scenarios).pack(side='left')
+        ttk.Button(top_s, text='Clear', command=lambda: self.populate_scenarios_list(self.scenarios)).pack(side='left', padx=4)
+        ttk.Label(top_s, text='Difficulty:').pack(side='left', padx=(12,4))
+        self.scenario_diff_var = tk.StringVar(value='all')
+        ttk.Combobox(top_s, textvariable=self.scenario_diff_var, values=['all','beginner','intermediate','advanced'], width=12).pack(side='left')
+        self.scenario_search_entry.bind('<Return>', lambda e: self.search_scenarios())
+
+        main_s = ttk.Frame(scenarios_frame)
+        main_s.pack(fill='both', expand=True, padx=6, pady=6)
+        left_s = ttk.Frame(main_s)
+        left_s.pack(side='left', fill='y')
+        ttk.Label(left_s, text='Scenarios').pack()
+        self.scenarios_listbox = tk.Listbox(left_s, width=40, height=20)
+        self.scenarios_listbox.pack(fill='y')
+        self.scenarios_listbox.bind('<<ListboxSelect>>', lambda e: self.show_selected_scenario())
+
+        right_s = ttk.Frame(main_s)
+        right_s.pack(side='left', fill='both', expand=True, padx=(8,0))
+        self.scenario_title = ttk.Label(right_s, text='Select a scenario', font=('Segoe UI', 12, 'bold'))
+        self.scenario_title.pack(anchor='w')
+        self.scenario_text = tk.Text(right_s, wrap='word')
+        self.scenario_text.pack(fill='both', expand=True, pady=(6,0))
+        ttk.Button(right_s, text='Copy Config to Clipboard', command=self.copy_scenario_config).pack(pady=6)
+
+        # load scenarios
+        self.scenarios = self.load_scenarios()
+        self.populate_scenarios_list(self.scenarios)
 
     def load_study(self):
         content = ''
@@ -191,6 +234,101 @@ class CiscoAdminGame(tk.Tk):
                 return json.load(f).get('labs', [])
         except Exception:
             return []
+
+    def load_scenarios(self):
+        if not os.path.exists(SCENARIOS_FILE):
+            return []
+        try:
+            with open(SCENARIOS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f).get('scenarios', [])
+        except Exception:
+            return []
+
+    def populate_scenarios_list(self, scenarios):
+        self.scenarios_listbox.delete(0, tk.END)
+        for s in scenarios:
+            title = f"[{s.get('difficulty','?')}] {s.get('title') }"
+            self.scenarios_listbox.insert(tk.END, title)
+
+    def search_scenarios(self):
+        query = (self.scenario_search_var.get() or '').strip().lower()
+        diff = (self.scenario_diff_var.get() or 'all').lower()
+        results = []
+        for s in self.scenarios:
+            if diff != 'all' and s.get('difficulty','').lower() != diff:
+                continue
+            hay = ' '.join([
+                s.get('title',''), s.get('summary',''), s.get('scenario_description',''), s.get('full_config_snippet','')
+            ]).lower()
+            # also search within steps and commands
+            for st in s.get('steps',[]):
+                hay += ' ' + ' '.join([str(x).lower() for x in st.get('commands',[])])
+                hay += ' ' + (st.get('title','') or '').lower()
+            if not query or query in hay:
+                results.append(s)
+        if not results:
+            messagebox.showinfo('Search Results', f'No scenarios match "{query}" with difficulty {diff}.')
+        self.populate_scenarios_list(results)
+        # temporarily store last search results to map listbox index
+        self._last_scenario_results = results
+
+    def show_selected_scenario(self):
+        sel = self.scenarios_listbox.curselection()
+        if not sel:
+            return
+        idx = sel[0]
+        # if a search was done, use results mapping; otherwise use full list
+        results = getattr(self, '_last_scenario_results', None)
+        if results is None:
+            results = self.scenarios
+        if idx >= len(results):
+            return
+        s = results[idx]
+        self.render_scenario_details(s)
+
+    def render_scenario_details(self, s):
+        self.scenario_title.config(text=s.get('title',''))
+        self.scenario_text.delete('1.0', tk.END)
+        out = []
+        out.append(f"Difficulty: {s.get('difficulty','')}")
+        out.append('\nSummary:\n' + s.get('summary',''))
+        if s.get('prerequisites'):
+            out.append('\nPrerequisites:\n' + '\n'.join(['- '+p for p in s.get('prerequisites',[])]))
+        if s.get('scenario_description'):
+            out.append('\nScenario Description:\n' + s.get('scenario_description'))
+        if s.get('objectives'):
+            out.append('\nObjectives:\n' + '\n'.join(['- '+o for o in s.get('objectives',[])]))
+        if s.get('steps'):
+            out.append('\nSteps:')
+            for st in s.get('steps',[]):
+                out.append(f"\nStep {st.get('step','?')}: {st.get('title','')}")
+                if st.get('commands'):
+                    out.append('Commands:')
+                    for c in st.get('commands',[]):
+                        out.append('  ' + c)
+                if st.get('notes'):
+                    out.append('Notes: ' + st.get('notes'))
+        if s.get('full_config_snippet'):
+            out.append('\nFull Configuration Snippet:\n' + s.get('full_config_snippet'))
+        self.scenario_text.insert(tk.END, '\n'.join(out))
+        # store last selected scenario for copy
+        self._last_selected_scenario = s
+
+    def copy_scenario_config(self):
+        s = getattr(self, '_last_selected_scenario', None)
+        if not s:
+            messagebox.showwarning('No selection', 'Select a scenario first')
+            return
+        cfg = s.get('full_config_snippet','')
+        if not cfg:
+            messagebox.showinfo('No Config', 'Selected scenario has no full config snippet to copy.')
+            return
+        try:
+            self.clipboard_clear()
+            self.clipboard_append(cfg)
+            messagebox.showinfo('Copied', 'Configuration snippet copied to clipboard')
+        except Exception as e:
+            messagebox.showerror('Error', f'Failed to copy to clipboard: {e}')
 
     def start_quiz(self):
         diff = self.difficulty_var.get()
@@ -326,6 +464,11 @@ class CiscoAdminGame(tk.Tk):
         self.current_lab = self.labs[idx]
         self.lab_step = 0
         self.lab_title.config(text=self.current_lab.get('title', 'Lab'))
+        # ensure markdown doc exists and open it
+        try:
+            self.open_lab_markdown()
+        except Exception:
+            pass
         self.show_lab_step()
 
     def show_lab_step(self):
@@ -339,6 +482,11 @@ class CiscoAdminGame(tk.Tk):
         self.lab_step_label.config(text=f"Step {self.lab_step+1}/{len(steps)}: {step.get('title','')}")
         self.lab_cmd_entry.delete(0, tk.END)
         self.lab_output.delete('1.0', tk.END)
+        # draw diagram if available
+        self.lab_canvas.delete('all')
+        diagram = self.current_lab.get('diagram')
+        if diagram:
+            self.draw_lab_diagram(diagram)
 
     def submit_lab_command(self):
         if not hasattr(self, 'current_lab'):
@@ -348,14 +496,296 @@ class CiscoAdminGame(tk.Tk):
         step = steps[self.lab_step]
         entered = self.lab_cmd_entry.get().strip()
         expected = step.get('expected', [])
-        ok = any(e.strip().lower() == entered.lower() for e in expected)
+        ok = False
+        # check simulated responses first (ping/nslookup etc.)
+        sim = self.current_lab.get('simulated', {})
+        for pat,res in sim.items():
+            # support regex keys (prefix re:), otherwise exact/normalized match
+            if pat.startswith('re:'):
+                if re.search(pat[3:], entered, re.I):
+                    self.lab_output.insert(tk.END, f"{res}\n")
+            else:
+                if entered.lower() == pat.lower():
+                    self.lab_output.insert(tk.END, f"{res}\n")
+        # normalize and match expected patterns (support regex with re:)
+        def norm(s):
+            return re.sub(r'\s+', ' ', (s or '').strip().lower())
+        for e in expected:
+            if isinstance(e, str) and e.startswith('re:'):
+                try:
+                    if re.search(e[3:], entered, re.I):
+                        ok = True
+                        break
+                except re.error:
+                    pass
+            else:
+                if norm(e) == norm(entered) or norm(e) in norm(entered) or norm(entered) in norm(e):
+                    ok = True
+                    break
         if ok:
             out = step.get('success_output', 'Command accepted.')
             self.lab_output.insert(tk.END, out + '\n')
             self.lab_step += 1
             self.after(300, self.show_lab_step)
         else:
-            self.lab_output.insert(tk.END, f"Incorrect command. Expected one of: {expected}\n")
+            # if no match, provide helpful hint showing normalized expected patterns
+            hints = [ (('re:' in e) and e) or re.sub(r'\s+', ' ', e.strip()) for e in expected ]
+            self.lab_output.insert(tk.END, f"Incorrect command. Expected one of: {hints}\n")
+
+    def draw_lab_diagram(self, diagram):
+        # simple renderer: draw nodes as rectangles with labels and straight links
+        nodes = {n['id']: n for n in diagram.get('nodes', [])}
+        # draw links
+        for a,b in diagram.get('links', []):
+            na = nodes.get(a)
+            nb = nodes.get(b)
+            if not na or not nb:
+                continue
+            x1,y1 = na.get('x'), na.get('y')
+            x2,y2 = nb.get('x'), nb.get('y')
+            self.lab_canvas.create_line(x1+40, y1+20, x2+40, y2+20, fill='black', width=2)
+        # draw nodes on top
+        for n in diagram.get('nodes', []):
+            x = n.get('x', 50)
+            y = n.get('y', 20)
+            w = 100
+            h = 36
+            self.lab_canvas.create_rectangle(x, y, x+w, y+h, fill='#f0f0f0', outline='black')
+            self.lab_canvas.create_text(x+6, y+6, anchor='nw', text=n.get('label',''), font=('Segoe UI', 9))
+
+    def lab_markdown_filename(self, lab):
+        # create a safe filename from lab title
+        title = lab.get('title','lab').strip().lower()
+        safe = re.sub(r'[^a-z0-9_-]+', '_', title)
+        docs_dir = os.path.join(BASE_DIR, 'labs_md')
+        os.makedirs(docs_dir, exist_ok=True)
+        return os.path.join(docs_dir, f"{safe}.md")
+
+    def save_lab_markdown(self, lab):
+        """Generate a markdown file for the lab, including a diagram (Mermaid when diagram data exists)."""
+        path = self.lab_markdown_filename(lab)
+        lines = []
+        lines.append(f"# {lab.get('title','Lab')}")
+        if lab.get('description'):
+            lines.append('\n' + lab.get('description') + '\n')
+        # diagram as Mermaid if present
+        diagram = lab.get('diagram')
+        if diagram:
+            lines.append('\n## Diagram\n')
+            lines.append('```mermaid')
+            lines.append('graph LR')
+            # map nodes and produce a more structured network diagram when possible
+            id_to_label = {}
+            def icon_for_label(labl):
+                low = (labl or '').lower()
+                if 'internet' in low or 'cloud' in low:
+                    return '☁️ '
+                if 'firewall' in low or 'fw' in low:
+                    return '🛡️ '
+                if 'router' in low or 'rtr' in low:
+                    return '📡 '
+                if 'access point' in low or 'wireless' in low or 'ap' in low:
+                    return '📶 '
+                if 'switch' in low:
+                    return '🔀 '
+                if 'server' in low or 'file' in low:
+                    return '🗄️ '
+                if 'laptop' in low:
+                    return '💻 '
+                if 'smartphone' in low or 'phone' in low:
+                    return '📱 '
+                if 'pc' in low or 'desktop' in low:
+                    return '🖥️ '
+                if 'printer' in low:
+                    return '🖨️ '
+                return ''
+
+            for n in diagram.get('nodes', []):
+                nid = n.get('id') or f"node{len(id_to_label)+1}"
+                labl = (n.get('label','') or '').strip()
+                icon = icon_for_label(labl)
+                display = f"{icon}{labl}" if labl else icon
+                display = display.replace('\n','\\n')
+                id_to_label[nid] = display
+            # synthetic mermaid ids (safe identifiers)
+            mermaid_id = {}
+            for i, orig in enumerate(id_to_label.keys(), start=1):
+                mermaid_id[orig] = f"n{i}"
+
+            # helper to find a node by keyword in its label
+            def find_node_keyword(keywords):
+                for orig, labl in id_to_label.items():
+                    low = (labl or '').lower()
+                    for k in keywords:
+                        if k in low:
+                            return orig
+                return None
+
+            internet = find_node_keyword(['internet', 'cloud'])
+            firewall = find_node_keyword(['firewall', 'fw'])
+            router = find_node_keyword(['router', 'rtr'])
+            ap = find_node_keyword(['access point', 'wireless', 'ap'])
+            switch = find_node_keyword(['switch'])
+            server = find_node_keyword(['server', 'fileserver'])
+
+            # build a structured diagram similar to the attached image
+            def mermaid_node(orig):
+                return f"{mermaid_id[orig]}[{id_to_label[orig]}]"
+
+            try:
+                if internet and firewall:
+                    lines.append(f"  {mermaid_id[internet]}(({id_to_label[internet]})) --> {mermaid_id[firewall]}([{id_to_label[firewall]}])")
+                    if router:
+                        lines.append(f"  {mermaid_id[firewall]} --> {mermaid_id[router]}([{id_to_label[router]}])")
+                elif router:
+                    lines.append(f"  {mermaid_id[router]}([{id_to_label[router]}])")
+
+                # central router connections
+                if router:
+                    # server
+                    if server:
+                        lines.append(f"  {mermaid_id[router]} --> {mermaid_id[server]}([{id_to_label[server]}])")
+                    # wireless side
+                    if ap:
+                        lines.append(f"  {mermaid_id[router]} --> {mermaid_id[ap]}([{id_to_label[ap]}])")
+                        # wireless clients (guess by keywords)
+                        wireless_clients = []
+                        for orig, labl in id_to_label.items():
+                            low = (labl or '').lower()
+                            if any(k in low for k in ['laptop', 'smartphone', 'phone', 'wireless', 'printer']) and orig != ap:
+                                wireless_clients.append(orig)
+                        if wireless_clients:
+                            lines.append(f"  subgraph Wireless Clients")
+                            for w in wireless_clients:
+                                lines.append(f"    {mermaid_id[w]}([{id_to_label[w]}])")
+                            lines.append(f"  end")
+                            # connect AP to clients
+                            for w in wireless_clients:
+                                lines.append(f"  {mermaid_id[ap]} --> {mermaid_id[w]}")
+                    # wired side (switch)
+                    if switch:
+                        lines.append(f"  {mermaid_id[router]} --> {mermaid_id[switch]}([{id_to_label[switch]}])")
+                        wired_clients = []
+                        for orig, labl in id_to_label.items():
+                            low = (labl or '').lower()
+                            if any(k in low for k in ['pc', 'desktop', 'ip phone', 'ip-phone', 'ipphone', 'printer']) and orig != switch:
+                                wired_clients.append(orig)
+                        if wired_clients:
+                            lines.append(f"  subgraph Wired Clients")
+                            for w in wired_clients:
+                                lines.append(f"    {mermaid_id[w]}([{id_to_label[w]}])")
+                            lines.append(f"  end")
+                            for w in wired_clients:
+                                lines.append(f"  {mermaid_id[switch]} --> {mermaid_id[w]}")
+
+                # if we were unable to detect a router-based structure, fall back to listing nodes and explicit links
+                else:
+                    # default: create nodes
+                    for orig, labl in id_to_label.items():
+                        lines.append(f"  {mermaid_id[orig]}[{labl}]")
+                    # links
+                    for a,b in diagram.get('links', []):
+                        if a in mermaid_id and b in mermaid_id:
+                            lines.append(f"  {mermaid_id[a]} --> {mermaid_id[b]}")
+            except Exception:
+                # on any unexpected problem, fall back to simple nodes+links
+                for orig, labl in id_to_label.items():
+                    lines.append(f"  {mermaid_id[orig]}[{labl}]")
+                for a,b in diagram.get('links', []):
+                    if a in mermaid_id and b in mermaid_id:
+                        lines.append(f"  {mermaid_id[a]} --> {mermaid_id[b]}")
+
+            lines.append('```')
+
+            # If nodes include explicit x/y coordinates, also embed an inline SVG
+            # to give a closer visual match to user's reference images.
+            has_coords = any(('x' in n and 'y' in n) for n in diagram.get('nodes', []))
+            if has_coords:
+                # build SVG canvas based on coordinate extents
+                nodes_coords = {}
+                minx = min(n.get('x', 0) for n in diagram.get('nodes', []))
+                miny = min(n.get('y', 0) for n in diagram.get('nodes', []))
+                maxx = max(n.get('x', 0) for n in diagram.get('nodes', []))
+                maxy = max(n.get('y', 0) for n in diagram.get('nodes', []))
+                pad = 40
+                width = int(maxx - minx + pad*2 + 200)
+                height = int(maxy - miny + pad*2 + 200)
+                # compute adjusted positions
+                for orig in id_to_label.keys():
+                    # find original node entry
+                    nent = next((n for n in diagram.get('nodes', []) if n.get('id') == orig), None)
+                    if not nent:
+                        continue
+                    x = int(nent.get('x', 0) - minx + pad + 20)
+                    y = int(nent.get('y', 0) - miny + pad + 20)
+                    nodes_coords[orig] = (x, y)
+
+                svg_lines = []
+                svg_lines.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">')
+                svg_lines.append('<style> .node { fill:#f8f9fa; stroke:#333; stroke-width:1.5 } .nlabel { font-family:Segoe UI, Arial, sans-serif; font-size:12px; }</style>')
+                # draw links first so nodes render on top
+                for a,b in diagram.get('links', []):
+                    if a in nodes_coords and b in nodes_coords:
+                        x1,y1 = nodes_coords[a]
+                        x2,y2 = nodes_coords[b]
+                        svg_lines.append(f'<line x1="{x1+60}" y1="{y1+20}" x2="{x2+20}" y2="{y2+20}" stroke="#222" stroke-width="2" />')
+                # draw nodes
+                for orig, lbl in id_to_label.items():
+                    pos = nodes_coords.get(orig)
+                    if not pos:
+                        continue
+                    x,y = pos
+                    w = 120
+                    h = 36
+                    rx = 6
+                    svg_lines.append(f'<rect class="node" x="{x}" y="{y}" rx="{rx}" ry="{rx}" width="{w}" height="{h}" />')
+                    safe_label = (lbl or '').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+                    svg_lines.append(f'<text class="nlabel" x="{x+8}" y="{y+20}">{safe_label}</text>')
+                svg_lines.append('</svg>')
+                # embed under a visual section
+                lines.append('\n## Visual Diagram\n')
+                # Insert raw SVG (most Markdown renderers and VS Code preview will render it)
+                lines.append('\n'.join(svg_lines))
+        # steps and expected
+        if lab.get('steps'):
+            lines.append('\n## Steps\n')
+            for st in lab.get('steps', []):
+                lines.append(f"### Step {st.get('step','')}: {st.get('title','')}")
+                if st.get('description'):
+                    lines.append(st.get('description'))
+                if st.get('commands'):
+                    lines.append('\n```\n' + '\n'.join(st.get('commands')) + '\n```')
+                if st.get('expected'):
+                    lines.append('\n**Expected:**')
+                    for e in st.get('expected'):
+                        lines.append(f"- `{e}`")
+        # simulated outputs
+        if lab.get('simulated'):
+            lines.append('\n## Simulated Outputs\n')
+            for k,v in lab.get('simulated', {}).items():
+                lines.append(f"- `{k}` => `{v}`")
+        # write file
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write('\n'.join(lines))
+        return path
+
+    def open_lab_markdown(self):
+        """Save and open the lab markdown in the system default editor (Windows uses os.startfile)."""
+        lab = getattr(self, 'current_lab', None)
+        if not lab:
+            messagebox.showwarning('No Lab', 'Start a lab first to open its markdown.')
+            return
+        try:
+            path = self.save_lab_markdown(lab)
+            # attempt to open with default program (Windows)
+            try:
+                os.startfile(path)
+            except AttributeError:
+                # fallback: on non-windows, try open via system
+                import webbrowser
+                webbrowser.open(path)
+        except Exception as e:
+            messagebox.showerror('Error', f'Failed to create/open markdown: {e}')
 
     def next_question(self):
         # move to next question (called after submit and explanation optional)

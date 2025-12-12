@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ACL and Access Restriction Lab</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .mermaid {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .description {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #1a5f7a;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1a5f7a;
+    }
+    .expected {
+      background: #f0f7f0;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .expected strong { color: #27ae60; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'default',
+          flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>ACL and Access Restriction Lab</h1>
+<div class="description"><strong>Goal:</strong> Goal: Implement ACLs on a router to allow only DNS and HTTP from a user subnet to a server, deny everything else, and verify with pings and connection tests.</div>
+<h2>Network Diagram</h2>
+<div class="mermaid">
+graph LR
+    Users["🖥️ User Subnet<br/>10.1.1.0/24"]
+    Router["📡 Router<br/>ACL Applied"]
+    Server["🗄️ Server<br/>10.2.2.10"]
+    Users -->|"HTTP ✓<br/>DNS ✓<br/>ICMP ✗"| Router
+    Router --> Server
+</div>
+<h2>Lab Steps</h2>
+<div class="step">
+<h3>Step 1: Create ACL to permit DNS and HTTP</h3>
+<p>Create standard/extended ACL permitting tcp 80 and udp/tcp 53 from user subnet to server and deny others.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>ip access-list extended USER_TO_SRV<br/> permit tcp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 80<br/> permit udp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 53<br/> permit tcp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 53<br/> deny ip any any</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 2: Apply ACL to interface</h3>
+<p>Apply the ACL in the correct direction on the router interface facing users.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>interface gigabitEthernet0/1<br/> ip access-group USER_TO_SRV in</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 3: Verify access</h3>
+<p>From a user host attempt: ping server, curl http://10.2.2.10, and dig @10.2.2.10 www.example.com</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>ping 10.2.2.10</code></li>
+<li><code>curl http://10.2.2.10</code></li>
+<li><code>nslookup www.example.com 10.2.2.10</code></li>
+</ul>
+</div>
+</div>
+<h2>Simulated Outputs</h2>
+<div class="simulated">
+<ul>
+<li><code>curl http://10.2.2.10</code> → <code>http:200 OK</code></li>
+<li><code>nslookup www.example.com 10.2.2.10</code> → <code>answer:10.2.2.10</code></li>
+</ul>
+</div>
+</body>
+</html>

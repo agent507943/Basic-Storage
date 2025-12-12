@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Enable SNMP and Test Polling</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .mermaid {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .description {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #1a5f7a;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1a5f7a;
+    }
+    .expected {
+      background: #f0f7f0;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .expected strong { color: #27ae60; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'default',
+          flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>Enable SNMP and Test Polling</h1>
+<div class="description"><strong>Goal:</strong> Enable SNMPv2c and SNMPv3 user, configure a collector host and verify read access.</div>
+<h2>Network Diagram</h2>
+<div class="mermaid">
+graph LR
+    Router["📡 Router<br/>SNMP Agent"]
+    NMS["🗄️ NMS/Collector<br/>192.0.2.5"]
+    Router -->|"SNMPv2c/v3<br/>Community: MONRO"| NMS
+</div>
+<h2>Lab Steps</h2>
+<div class="step">
+<h3>Step 1: Configure SNMP community and host</h3>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>snmp-server community MONRO ro 10</code></li>
+<li><code>snmp-server host 192.0.2.5 version 2c MONRO</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 2: Configure SNMPv3 user</h3>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>snmp-server group SECLOCAL v3 priv</code></li>
+<li><code>snmp-server user admin SECLOCAL v3 auth sha AuthPass priv aes 128 PrivPass</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 3: Verify</h3>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show snmp user</code></li>
+<li><code>show snmp group</code></li>
+</ul>
+</div>
+</div>
+<h2>Simulated Outputs</h2>
+<div class="simulated">
+<ul>
+<li><code>show snmp user</code> → <code>User: admin, security model: v3</code></li>
+<li><code>show snmp group</code> → <code>Group: SECLOCAL, v3, priv</code></li>
+</ul>
+</div>
+</body>
+</html>

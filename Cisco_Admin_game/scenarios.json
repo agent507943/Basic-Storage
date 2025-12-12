@@ -1,0 +1,746 @@
+{
+  "scenarios": [
+    {
+      "id": "s001",
+      "title": "Add VLANs to a Switch (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Create VLANs, name them, and assign access ports on a Cisco Catalyst switch.",
+      "prerequisites": ["Basic CLI access to the switch (console or SSH)", "privileged EXEC access (enable)"],
+      "objectives": ["Create VLAN 10 (DATA) and VLAN 20 (VOICE)", "Name VLANs", "Assign access ports to VLANs"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Enter global config and create VLANs",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "vlan 10",
+            " name DATA",
+            "exit",
+            "vlan 20",
+            " name VOICE",
+            "exit"
+          ],
+          "notes": "Some devices accept `name DATA` on the same line as `vlan 10` or as a following `name` command."
+        }
+      ],
+      "full_config_snippet": "vlan 10\\n name DATA\\n!\\nvlan 20\\n name VOICE\\n!\\ninterface GigabitEthernet0/1\\n switchport mode access\\n switchport access vlan 10\\n no shutdown\\n"
+    },
+    {
+      "id": "s002",
+      "title": "Configure a Switch Using a Config File (Beginner→Intermediate)",
+      "difficulty": "intermediate",
+      "summary": "Load a configuration file onto a managed switch and apply it safely, including hostname, management IP, and VLANs.",
+      "prerequisites": ["TFTP/FTP/USB access to the device or console access", "An existing config file prepared"],
+      "objectives": ["Backup current config", "Copy new config to device", "Verify and reload safely"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Backup current running config",
+          "commands": [
+            "enable",
+            "copy running-config tftp",
+            "(enter TFTP server IP)",
+            "(enter filename or accept default)"
+          ],
+          "notes": "Always backup before replacing config."
+        }
+      ],
+      "full_config_snippet": "hostname SWITCH-01\\ninterface Vlan1\\n ip address 192.168.1.2 255.255.255.0\\n no shutdown\\n"
+    },
+    {
+      "id": "s003",
+      "title": "Setup Trunking on a Switch (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Configure an 802.1Q trunk between two switches and allow VLANs 10 and 20.",
+      "steps": [
+        {
+          "step": 1,
+          "title": "Configure trunk on both ends",
+          "commands": [
+            "interface GigabitEthernet0/24",
+            " switchport trunk encapsulation dot1q",
+            " switchport mode trunk",
+            " switchport trunk allowed vlan 10,20",
+            " no shutdown"
+          ]
+        }
+      ],
+      "full_config_snippet": "interface GigabitEthernet0/24\\n switchport trunk encapsulation dot1q\\n switchport mode trunk\\n switchport trunk allowed vlan 10,20\\n no shutdown\\n"
+    },
+    {
+      "id": "s004",
+      "title": "Create a Route Between Two Routers (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Add static routes so two routers can reach each other's LANs over a point-to-point link.",
+      "steps": [
+        {"step":1, "commands":["enable","configure terminal","ip route 10.2.2.0 255.255.255.0 192.168.100.2"]}
+      ]
+    },
+    {
+      "id": "s005",
+      "title": "Configure a Routed Connection Across States (Intermediate)",
+      "difficulty": "intermediate",
+      "summary": "Configure routing between two routers located in different geographic locations; include addressing, secure management access, and an example of using a dynamic routing protocol with authentication.",
+      "steps": [
+        {"step":1, "commands":["enable","configure terminal","interface GigabitEthernet0/0"," ip address 203.0.113.1 255.255.255.252"]}
+      ]
+    },
+    {
+      "id": "s006",
+      "title": "Add Node Clusters to a Switch (Advanced)",
+      "difficulty": "advanced",
+      "steps": [
+        {"step":1, "commands":["vlan 10\\n name DATA","vlan 20\\n name VOICE"]}
+      ]
+    },
+    {
+      "id": "s007",
+      "title": "Configure a Managed Switch and Connect 3 Access Switches with Multiple VLANs (Advanced)",
+      "difficulty": "advanced",
+      "steps": [
+        {"step":1, "commands":["hostname AGG-SW","interface Vlan1"," ip address 10.255.255.2 255.255.255.0"]}
+      ]
+    },
+    {
+      "id": "s008",
+      "title": "Configure PAT (NAT Overload) for Internet Access",
+      "difficulty": "beginner",
+      "steps": [
+        {"step":1, "commands":["interface GigabitEthernet0/0"," ip address 203.0.113.10 255.255.255.248"]}
+      ]
+    },
+    {
+      "id": "s009",
+      "title": "Site-to-Site IPsec VPN (Basic)",
+      "difficulty": "intermediate",
+      "steps": [
+        {"step":1, "commands":["crypto isakmp policy 10"," encr aes"]}
+      ]
+    },
+    {
+      "id": "s010",
+      "title": "BGP Peering and Basic Route Filtering",
+      "difficulty": "intermediate",
+      "steps": [
+        {"step":1, "commands":["router bgp 65000"," neighbor 203.0.113.2 remote-as 65001"]}
+      ]
+    },
+    {
+      "id": "s011",
+      "title": "Configure SNMP and Centralized Monitoring",
+      "difficulty": "beginner",
+      "steps": [
+        {"step":1, "commands":["snmp-server community MONRO read 10"]}
+      ]
+    },
+    {
+      "id": "s012",
+      "title": "MPLS Basics: LSP and Route Distribution",
+      "difficulty": "advanced",
+      "steps": [
+        {"step":1, "commands":["mpls ip","interface GigabitEthernet0/0"," ip address 10.0.0.1 255.255.255.0"]}
+      ]
+    },
+    {
+      "id": "s013",
+      "title": "VXLAN/EVPN Basic Fabric (Concept + Minimal Config)",
+      "difficulty": "advanced",
+      "steps": [
+        {"step":1, "commands":["vlan 10"," name DATA","vn-segment 1010"]}
+      ]
+    },
+    {
+      "id": "s014",
+      "title": "Automate Device Configuration with Ansible (Example Playbook)",
+      "difficulty": "intermediate",
+      "steps": [
+        {"step":1, "commands":["- name: Configure interface\n  hosts: switches\n  connection: network_cli"]}
+      ]
+    },
+    {
+      "id": "s015",
+      "title": "QoS for Voice (Priority Queuing)",
+      "difficulty": "intermediate",
+      "steps": [
+        {"step":1, "commands":["class-map match-any VOICE"," match ip dscp ef"]}
+      ]
+    },
+    {
+      "id": "s016",
+      "title": "HSRP: Gateway Redundancy for VLAN SVI",
+      "difficulty": "beginner",
+      "steps": [
+        {"step":1, "commands":["interface Vlan10"," ip address 10.0.10.2 255.255.255.0"," standby 10 ip 10.0.10.1"]}
+      ]
+    },
+    {
+      "id": "s017",
+      "title": "SD-WAN: Basic Policy and Overlay Concept",
+      "difficulty": "advanced",
+      "steps": [
+        {"step":1, "commands":["# Controller config is vendor specific - examples are provided in vendor docs"]}
+      ]
+    },
+    {
+      "id": "s018",
+      "title": "Secure Console and VTY Access (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Configure passwords for console, VTY (telnet/SSH), and privileged EXEC mode to secure device access.",
+      "prerequisites": ["Console access to the device", "Basic CLI navigation knowledge"],
+      "objectives": ["Set enable secret", "Secure console line with password", "Secure VTY lines for remote access", "Enable password encryption"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Enter global configuration and set enable secret",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "enable secret CiscoSecure123",
+            "service password-encryption"
+          ],
+          "notes": "Use 'enable secret' instead of 'enable password' for stronger MD5 hashing."
+        },
+        {
+          "step": 2,
+          "title": "Secure console line",
+          "commands": [
+            "line console 0",
+            " password ConsolePass",
+            " login",
+            " exec-timeout 5 0",
+            " logging synchronous",
+            "exit"
+          ],
+          "notes": "exec-timeout sets idle timeout (5 minutes, 0 seconds). logging synchronous prevents command interruption by log messages."
+        },
+        {
+          "step": 3,
+          "title": "Secure VTY lines for remote access",
+          "commands": [
+            "line vty 0 4",
+            " password VtyPass",
+            " login",
+            " exec-timeout 10 0",
+            " transport input ssh",
+            "exit"
+          ],
+          "notes": "Use 'transport input ssh' to allow only SSH. Use 'transport input telnet ssh' for both."
+        }
+      ],
+      "full_config_snippet": "enable secret CiscoSecure123\\nservice password-encryption\\nline console 0\\n password ConsolePass\\n login\\n exec-timeout 5 0\\n logging synchronous\\nline vty 0 4\\n password VtyPass\\n login\\n exec-timeout 10 0\\n transport input ssh\\n"
+    },
+    {
+      "id": "s019",
+      "title": "Configure SSH for Secure Remote Access (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Enable SSH on a Cisco device for secure remote management instead of Telnet.",
+      "prerequisites": ["Hostname configured", "Domain name configured", "IOS image supports crypto"],
+      "objectives": ["Set hostname and domain", "Generate RSA keys", "Create local user", "Enable SSH on VTY lines"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Configure hostname and domain name",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "hostname R1",
+            "ip domain-name company.local"
+          ],
+          "notes": "Both hostname and domain name are required before generating RSA keys."
+        },
+        {
+          "step": 2,
+          "title": "Generate RSA keys",
+          "commands": [
+            "crypto key generate rsa modulus 2048"
+          ],
+          "notes": "Use at least 2048 bits for security. This enables SSH version 2."
+        },
+        {
+          "step": 3,
+          "title": "Create local user and configure VTY",
+          "commands": [
+            "username admin privilege 15 secret AdminPass123",
+            "line vty 0 4",
+            " login local",
+            " transport input ssh",
+            "exit",
+            "ip ssh version 2"
+          ],
+          "notes": "'login local' uses local user database. 'privilege 15' grants full access."
+        }
+      ],
+      "full_config_snippet": "hostname R1\\nip domain-name company.local\\ncrypto key generate rsa modulus 2048\\nusername admin privilege 15 secret AdminPass123\\nline vty 0 4\\n login local\\n transport input ssh\\nip ssh version 2\\n"
+    },
+    {
+      "id": "s020",
+      "title": "Configure Switch Port Security (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Enable port security to limit MAC addresses on a switchport and prevent unauthorized devices.",
+      "prerequisites": ["Access to switch CLI", "Interface in access mode"],
+      "objectives": ["Enable port security", "Set maximum MAC addresses", "Configure sticky MAC learning", "Set violation action"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Configure interface as access port",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "interface GigabitEthernet0/1",
+            " switchport mode access",
+            " switchport access vlan 10"
+          ],
+          "notes": "Port security only works on access ports, not trunk ports."
+        },
+        {
+          "step": 2,
+          "title": "Enable port security with sticky MAC",
+          "commands": [
+            " switchport port-security",
+            " switchport port-security maximum 2",
+            " switchport port-security mac-address sticky",
+            " switchport port-security violation shutdown",
+            " no shutdown",
+            "exit"
+          ],
+          "notes": "Violation modes: shutdown (disable port), restrict (drop + log), protect (drop silently)."
+        }
+      ],
+      "full_config_snippet": "interface GigabitEthernet0/1\\n switchport mode access\\n switchport access vlan 10\\n switchport port-security\\n switchport port-security maximum 2\\n switchport port-security mac-address sticky\\n switchport port-security violation shutdown\\n no shutdown\\n"
+    },
+    {
+      "id": "s021",
+      "title": "Configure CDP and LLDP for Device Discovery (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Enable and use CDP (Cisco Discovery Protocol) and LLDP (Link Layer Discovery Protocol) to discover neighboring devices.",
+      "prerequisites": ["Access to switch or router CLI"],
+      "objectives": ["Verify CDP status", "View CDP neighbors", "Enable LLDP globally", "View LLDP neighbors"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Check and configure CDP",
+          "commands": [
+            "enable",
+            "show cdp neighbors",
+            "show cdp neighbors detail",
+            "configure terminal",
+            "cdp run"
+          ],
+          "notes": "CDP is enabled by default on most Cisco devices. Use 'no cdp run' to disable globally."
+        },
+        {
+          "step": 2,
+          "title": "Enable and use LLDP",
+          "commands": [
+            "lldp run",
+            "exit",
+            "show lldp neighbors",
+            "show lldp neighbors detail"
+          ],
+          "notes": "LLDP is industry-standard and works with non-Cisco devices. CDP is Cisco-proprietary."
+        }
+      ],
+      "full_config_snippet": "cdp run\\nlldp run\\n"
+    },
+    {
+      "id": "s022",
+      "title": "Configure Standard ACL to Filter Traffic (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Create and apply a standard access control list to permit or deny traffic based on source IP.",
+      "prerequisites": ["Understanding of IP addressing", "Router CLI access"],
+      "objectives": ["Create a numbered standard ACL", "Apply ACL to an interface", "Verify ACL with show commands"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Create standard ACL",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "access-list 10 permit 192.168.1.0 0.0.0.255",
+            "access-list 10 deny any log"
+          ],
+          "notes": "Standard ACLs (1-99, 1300-1999) filter by source IP only. Implicit deny all at end."
+        },
+        {
+          "step": 2,
+          "title": "Apply ACL to interface",
+          "commands": [
+            "interface GigabitEthernet0/1",
+            " ip access-group 10 in",
+            "exit"
+          ],
+          "notes": "Apply standard ACLs close to the destination. 'in' filters incoming, 'out' filters outgoing."
+        },
+        {
+          "step": 3,
+          "title": "Verify ACL",
+          "commands": [
+            "show access-lists",
+            "show ip interface GigabitEthernet0/1"
+          ],
+          "notes": "Check hit counts on ACL entries and verify ACL is applied to the interface."
+        }
+      ],
+      "full_config_snippet": "access-list 10 permit 192.168.1.0 0.0.0.255\\naccess-list 10 deny any log\\ninterface GigabitEthernet0/1\\n ip access-group 10 in\\n"
+    },
+    {
+      "id": "s023",
+      "title": "Configure Extended ACL for Granular Filtering (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Create an extended ACL to filter traffic based on source, destination, and protocol/port.",
+      "prerequisites": ["Understanding of TCP/UDP ports", "Router CLI access"],
+      "objectives": ["Create a named extended ACL", "Filter by protocol and port", "Apply ACL to interface"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Create named extended ACL",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "ip access-list extended WEB-FILTER",
+            " permit tcp 192.168.1.0 0.0.0.255 any eq 80",
+            " permit tcp 192.168.1.0 0.0.0.255 any eq 443",
+            " deny ip any any log",
+            "exit"
+          ],
+          "notes": "Extended ACLs (100-199, 2000-2699) can filter by source, dest, protocol, and port."
+        },
+        {
+          "step": 2,
+          "title": "Apply ACL close to source",
+          "commands": [
+            "interface GigabitEthernet0/0",
+            " ip access-group WEB-FILTER in",
+            "exit"
+          ],
+          "notes": "Apply extended ACLs close to the source to filter traffic early and save bandwidth."
+        }
+      ],
+      "full_config_snippet": "ip access-list extended WEB-FILTER\\n permit tcp 192.168.1.0 0.0.0.255 any eq 80\\n permit tcp 192.168.1.0 0.0.0.255 any eq 443\\n deny ip any any log\\ninterface GigabitEthernet0/0\\n ip access-group WEB-FILTER in\\n"
+    },
+    {
+      "id": "s024",
+      "title": "Configure NTP for Time Synchronization (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Set up NTP client to synchronize device time with an NTP server for accurate timestamps.",
+      "prerequisites": ["Network connectivity to NTP server", "Router/switch CLI access"],
+      "objectives": ["Configure timezone", "Set NTP server", "Verify synchronization"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Configure timezone and NTP",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "clock timezone EST -5",
+            "clock summer-time EDT recurring",
+            "ntp server 216.239.35.0",
+            "ntp server 216.239.35.4",
+            "exit"
+          ],
+          "notes": "Use multiple NTP servers for redundancy. Google NTP: time.google.com (216.239.35.0)."
+        },
+        {
+          "step": 2,
+          "title": "Verify NTP synchronization",
+          "commands": [
+            "show clock",
+            "show ntp status",
+            "show ntp associations"
+          ],
+          "notes": "NTP sync may take a few minutes. Look for '*' (synced) in associations output."
+        }
+      ],
+      "full_config_snippet": "clock timezone EST -5\\nclock summer-time EDT recurring\\nntp server 216.239.35.0\\nntp server 216.239.35.4\\n"
+    },
+    {
+      "id": "s025",
+      "title": "Configure Syslog for Centralized Logging (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Send device logs to a centralized syslog server for monitoring and troubleshooting.",
+      "prerequisites": ["Syslog server IP address", "Network connectivity"],
+      "objectives": ["Configure logging destination", "Set logging severity level", "Add timestamps to logs"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Configure syslog server and settings",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "logging host 192.168.1.100",
+            "logging trap informational",
+            "logging source-interface Loopback0",
+            "service timestamps log datetime msec localtime show-timezone",
+            "exit"
+          ],
+          "notes": "Severity levels: emergencies(0) to debugging(7). 'informational' (6) is common for general monitoring."
+        },
+        {
+          "step": 2,
+          "title": "Verify logging configuration",
+          "commands": [
+            "show logging"
+          ],
+          "notes": "Check buffer logs locally and verify messages are being sent to syslog server."
+        }
+      ],
+      "full_config_snippet": "logging host 192.168.1.100\\nlogging trap informational\\nlogging source-interface Loopback0\\nservice timestamps log datetime msec localtime show-timezone\\n"
+    },
+    {
+      "id": "s026",
+      "title": "Configure MOTD and Login Banners (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Set up banners to display legal warnings and identification when users connect to the device.",
+      "prerequisites": ["Console or remote access to device"],
+      "objectives": ["Configure MOTD banner", "Configure login banner", "Configure EXEC banner"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Configure device banners",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "banner motd #",
+            "****************************************",
+            "*  AUTHORIZED ACCESS ONLY!             *",
+            "*  All activity is monitored.          *",
+            "****************************************",
+            "#",
+            "banner login #",
+            "Enter your credentials to continue.",
+            "#",
+            "exit"
+          ],
+          "notes": "Use a delimiter character (#) that won't appear in the banner text. MOTD shows first, then login banner."
+        }
+      ],
+      "full_config_snippet": "banner motd #\\n****************************************\\n*  AUTHORIZED ACCESS ONLY!             *\\n*  All activity is monitored.          *\\n****************************************\\n#\\nbanner login #\\nEnter your credentials to continue.\\n#\\n"
+    },
+    {
+      "id": "s027",
+      "title": "Configure Interface Speed and Duplex (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Manually set interface speed and duplex to troubleshoot or match specific requirements.",
+      "prerequisites": ["Physical connectivity between devices", "Switch/router CLI access"],
+      "objectives": ["View current interface settings", "Configure speed and duplex", "Understand auto-negotiation"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Check current interface settings",
+          "commands": [
+            "enable",
+            "show interfaces GigabitEthernet0/1",
+            "show interfaces GigabitEthernet0/1 status"
+          ],
+          "notes": "Look for speed, duplex, and input/output errors in the output."
+        },
+        {
+          "step": 2,
+          "title": "Configure speed and duplex",
+          "commands": [
+            "configure terminal",
+            "interface GigabitEthernet0/1",
+            " speed 1000",
+            " duplex full",
+            " no shutdown",
+            "exit"
+          ],
+          "notes": "Both ends must match. Mismatched duplex causes collisions and poor performance. Use 'speed auto' and 'duplex auto' for auto-negotiation."
+        }
+      ],
+      "full_config_snippet": "interface GigabitEthernet0/1\\n speed 1000\\n duplex full\\n no shutdown\\n"
+    },
+    {
+      "id": "s028",
+      "title": "Basic Interface Troubleshooting Commands (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Use essential show commands to diagnose interface and connectivity issues.",
+      "prerequisites": ["CLI access to device"],
+      "objectives": ["Check interface status", "Identify common errors", "Verify Layer 2 and Layer 3 connectivity"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Check interface status and errors",
+          "commands": [
+            "enable",
+            "show ip interface brief",
+            "show interfaces GigabitEthernet0/1",
+            "show interfaces status"
+          ],
+          "notes": "Look for 'up/up' status. Check CRC errors, input errors, collisions, and resets."
+        },
+        {
+          "step": 2,
+          "title": "Verify Layer 2 connectivity",
+          "commands": [
+            "show mac address-table",
+            "show mac address-table interface GigabitEthernet0/1",
+            "show cdp neighbors"
+          ],
+          "notes": "MAC table shows learned addresses. CDP shows directly connected Cisco devices."
+        },
+        {
+          "step": 3,
+          "title": "Test Layer 3 connectivity",
+          "commands": [
+            "ping 192.168.1.1",
+            "traceroute 192.168.1.1",
+            "show ip route"
+          ],
+          "notes": "Ping tests reachability. Traceroute shows the path. Routing table shows known networks."
+        }
+      ],
+      "full_config_snippet": "! No configuration - these are verification commands\\nshow ip interface brief\\nshow interfaces GigabitEthernet0/1\\nshow mac address-table\\nping 192.168.1.1\\n"
+    },
+    {
+      "id": "s029",
+      "title": "Save and Backup Device Configuration (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Learn to save running configuration and create backups using TFTP, FTP, or local storage.",
+      "prerequisites": ["Device CLI access", "TFTP/FTP server for remote backup (optional)"],
+      "objectives": ["Save running-config to startup-config", "Backup config to TFTP", "View configuration differences"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Save configuration locally",
+          "commands": [
+            "enable",
+            "copy running-config startup-config",
+            "write memory"
+          ],
+          "notes": "Both commands save running-config to NVRAM. 'write' is shorter but 'copy run start' is more explicit."
+        },
+        {
+          "step": 2,
+          "title": "Backup to TFTP server",
+          "commands": [
+            "copy running-config tftp:",
+            "192.168.1.100",
+            "router-backup.cfg"
+          ],
+          "notes": "Enter TFTP server IP and filename when prompted. Ensure TFTP server is reachable."
+        },
+        {
+          "step": 3,
+          "title": "View and compare configurations",
+          "commands": [
+            "show running-config",
+            "show startup-config",
+            "show archive config differences"
+          ],
+          "notes": "Compare running and startup to see unsaved changes. Use 'show archive' if archive feature is configured."
+        }
+      ],
+      "full_config_snippet": "! Backup commands - not config\\ncopy running-config startup-config\\ncopy running-config tftp:\\n"
+    },
+    {
+      "id": "s030",
+      "title": "Disable Unused Switch Ports (Beginner - Security)",
+      "difficulty": "beginner",
+      "summary": "Shutdown unused ports and assign them to a black-hole VLAN for security best practices.",
+      "prerequisites": ["Switch CLI access", "Knowledge of which ports are in use"],
+      "objectives": ["Identify unused ports", "Shutdown unused ports", "Move to unused VLAN"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Identify and document port usage",
+          "commands": [
+            "enable",
+            "show interfaces status",
+            "show mac address-table"
+          ],
+          "notes": "Ports showing 'notconnect' are candidates for shutdown. Document before making changes."
+        },
+        {
+          "step": 2,
+          "title": "Create black-hole VLAN and disable ports",
+          "commands": [
+            "configure terminal",
+            "vlan 999",
+            " name BLACKHOLE",
+            "exit",
+            "interface range GigabitEthernet0/10 - 24",
+            " switchport mode access",
+            " switchport access vlan 999",
+            " shutdown",
+            "exit"
+          ],
+          "notes": "Using a black-hole VLAN adds extra protection. Port must be manually enabled when needed."
+        }
+      ],
+      "full_config_snippet": "vlan 999\\n name BLACKHOLE\\ninterface range GigabitEthernet0/10 - 24\\n switchport mode access\\n switchport access vlan 999\\n shutdown\\n"
+    },
+    {
+      "id": "s031",
+      "title": "Configure Loopback Interface (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Create a loopback interface for router identification, management, and routing protocol stability.",
+      "prerequisites": ["Router CLI access"],
+      "objectives": ["Create loopback interface", "Assign IP address", "Understand use cases"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Create and configure loopback",
+          "commands": [
+            "enable",
+            "configure terminal",
+            "interface Loopback0",
+            " ip address 1.1.1.1 255.255.255.255",
+            " description Management-Loopback",
+            " no shutdown",
+            "exit"
+          ],
+          "notes": "Loopbacks are virtual interfaces that never go down. Use /32 mask. Common for OSPF router-id, BGP updates, management."
+        },
+        {
+          "step": 2,
+          "title": "Verify loopback",
+          "commands": [
+            "show ip interface brief",
+            "show interfaces Loopback0"
+          ],
+          "notes": "Loopback should show up/up. It's always up as long as the router is running."
+        }
+      ],
+      "full_config_snippet": "interface Loopback0\\n ip address 1.1.1.1 255.255.255.255\\n description Management-Loopback\\n no shutdown\\n"
+    },
+    {
+      "id": "s032",
+      "title": "Basic Password Recovery Concepts (Beginner)",
+      "difficulty": "beginner",
+      "summary": "Understand the password recovery process for Cisco routers and switches (conceptual overview).",
+      "prerequisites": ["Physical console access to device", "Understanding of boot process"],
+      "objectives": ["Understand ROMMON mode", "Learn config-register role", "Know recovery steps"],
+      "steps": [
+        {
+          "step": 1,
+          "title": "Password recovery overview",
+          "commands": [
+            "! This is conceptual - actual recovery requires console access",
+            "! Step 1: Power cycle and break into ROMMON (Ctrl+Break)",
+            "! Step 2: Change config-register to skip startup-config",
+            "rommon> confreg 0x2142",
+            "rommon> reset"
+          ],
+          "notes": "0x2142 tells router to ignore startup-config. Normal register is 0x2102."
+        },
+        {
+          "step": 2,
+          "title": "After boot - reset password",
+          "commands": [
+            "enable",
+            "copy startup-config running-config",
+            "configure terminal",
+            "enable secret NewPassword123",
+            "config-register 0x2102",
+            "exit",
+            "copy running-config startup-config"
+          ],
+          "notes": "Copy startup to running preserves old config. Change password, restore register, save."
+        }
+      ],
+      "full_config_snippet": "! Password recovery procedure - requires physical console access\\n! config-register 0x2142 to bypass startup-config\\n! config-register 0x2102 to restore normal boot\\n"
+    }
+  ]
+}

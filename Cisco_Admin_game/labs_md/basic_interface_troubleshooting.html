@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Basic Interface Troubleshooting</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .beginner { background: #d4edda; color: #155724; }
+    .mermaid {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .description {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #1a5f7a;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1a5f7a;
+    }
+    .expected {
+      background: #f0f7f0;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .expected strong { color: #27ae60; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'default',
+          flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>Basic Interface Troubleshooting</h1>
+<span class="difficulty beginner">Beginner Level</span>
+<div class="description"><strong>Goal:</strong> Learn fundamental commands to troubleshoot interface issues: check status, verify IP configuration, identify speed/duplex mismatches, and view error counters.</div>
+<h2>Network Diagram</h2>
+<div class="mermaid">
+graph TD
+    Router["📡 Router<br/>Gi0/0: 192.168.1.1"]
+    Switch["🔀 Switch<br/>Gi0/1"]
+    PC["🖥️ PC<br/>192.168.1.10"]
+    Router --> Switch
+    Switch --> PC
+    subgraph Commands["Troubleshooting Commands"]
+        A["show ip interface brief"]
+        B["show interface gi0/0"]
+        C["show ip interface gi0/0"]
+        D["no shutdown"]
+    end
+</div>
+<h2>Lab Steps</h2>
+<div class="step">
+<h3>Step 1: Check interface status summary</h3>
+<p>View a brief summary of all interfaces showing status (up/down) and protocol state.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show ip interface brief</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 2: View detailed interface status</h3>
+<p>Check detailed information for GigabitEthernet0/0 including speed, duplex, and line protocol.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show interface gigabitEthernet0/0</code></li>
+<li><code>show interface gi0/0</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 3: Check for interface errors</h3>
+<p>Look for input/output errors, CRC errors, collisions, and other counters that indicate problems.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show interface gi0/0 | include errors</code></li>
+<li><code>show interface gi0/0</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 4: Verify IP address configuration</h3>
+<p>Confirm the IP address and subnet mask configured on the interface.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>show ip interface gi0/0</code></li>
+<li><code>show running-config interface gi0/0</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 5: Bring up a down interface</h3>
+<p>If an interface is administratively down, enable it with 'no shutdown'.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>interface gi0/0</code></li>
+<li><code>no shutdown</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 6: Set speed and duplex manually</h3>
+<p>If there's a duplex mismatch, manually configure speed and duplex (or set to auto).</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>interface gi0/0</code></li>
+<li><code>speed auto</code></li>
+<li><code>duplex auto</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 7: Clear interface counters</h3>
+<p>Reset the error counters to monitor for new issues after a fix.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>clear counters gi0/0</code></li>
+</ul>
+</div>
+</div>
+<h2>Simulated Outputs</h2>
+<div class="simulated">
+<ul>
+<li><code>show ip interface brief</code> &rarr; <code>Interface       IP-Address      Status    Protocol<br/>Gi0/0           192.168.1.1     up        up<br/>Gi0/1           unassigned      down      down</code></li>
+<li><code>show interface gi0/0</code> &rarr; <code>GigabitEthernet0/0 is up, line protocol is up<br/>  Hardware is Gigabit Ethernet<br/>  Internet address is 192.168.1.1/24<br/>  MTU 1500 bytes, BW 1000000 Kbit<br/>  Full-duplex, 1000Mb/s<br/>  5 minute input rate 1000 bits/sec<br/>  0 input errors, 0 CRC, 0 frame</code></li>
+<li><code>show ip interface gi0/0</code> &rarr; <code>GigabitEthernet0/0 is up, line protocol is up<br/>  Internet address is 192.168.1.1/24<br/>  Broadcast address is 255.255.255.255</code></li>
+</ul>
+</div>
+</body>
+</html>

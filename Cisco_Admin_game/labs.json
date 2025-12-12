@@ -7,42 +7,24 @@
         {
           "title": "Create VLANs",
           "description": "Create VLAN 10 (DATA) and VLAN 20 (VOICE) on the switch.",
-          "expected": ["vlan 10\nname DATA", "vlan 10\n name DATA", "vlan 10\nname DATA\n"],
-          "success_output": "VLAN 10 created."
+          "expected": ["vlan 10\\nname DATA", "vlan 20\\nname VOICE"],
+          "success_output": "VLANs created."
         },
         {
           "title": "Create SVI",
           "description": "Create SVI interface vlan 10 and assign IP 10.0.10.2/24.",
-          "expected": ["interface vlan 10\n ip address 10.0.10.2 255.255.255.0", "interface vlan 10\nip address 10.0.10.2 255.255.255.0"],
-          "success_output": "SVI for VLAN 10 created with IP 10.0.10.2/24."
+          "expected": ["interface vlan 10\\n ip address 10.0.10.2 255.255.255.0"],
+          "success_output": "SVI created and IP assigned."
         },
         {
           "title": "Assign Access Port",
           "description": "Configure interface GigabitEthernet0/1 as access for VLAN 10.",
-          "expected": ["interface gigabitEthernet0/1\n switchport mode access\n switchport access vlan 10", "interface gigabitEthernet0/1\nswitchport mode access\nswitchport access vlan 10"],
+          "expected": ["interface gigabitEthernet0/1\\n switchport mode access\\n switchport access vlan 10"],
           "success_output": "Port Gi0/1 configured as access VLAN 10."
         }
       ]
     },
-    {
-      "title": "Router-on-a-Stick with DHCP",
-      "description": "Configure a router subinterface, dot1q encapsulation and DHCP pool for a VLAN.",
-      "steps": [
-        {
-          "title": "Create subinterface",
-          "description": "Create GigabitEthernet0/0.10 with encapsulation dot1Q 10 and IP 10.0.10.1/24.",
-          "expected": ["interface gigabitEthernet0/0.10\nencapsulation dot1q 10\n ip address 10.0.10.1 255.255.255.0", "interface gigabitEthernet0/0.10\nencapsulation dot1q 10\nip address 10.0.10.1 255.255.255.0"],
-          "success_output": "Subinterface Gi0/0.10 created with IP 10.0.10.1/24."
-        },
-        {
-          "title": "Configure DHCP pool",
-          "description": "Create DHCP pool for 10.0.10.0/24 with default-router 10.0.10.1.",
-          "expected": ["ip dhcp pool DATA\n network 10.0.10.0 255.255.255.0\n default-router 10.0.10.1", "ip dhcp pool DATA\nnetwork 10.0.10.0 255.255.255.0\ndefault-router 10.0.10.1"],
-          "success_output": "DHCP pool DATA created for 10.0.10.0/24."
-        }
-      ]
-    }
-    ,
+
     {
       "title": "Firewall Policy: Allow Web and SSH to DMZ",
       "description": "Create policies and NAT (if needed) to allow HTTP and SSH to a DMZ web and management host.",
@@ -50,7 +32,7 @@
         {
           "title": "Create inbound HTTP rule",
           "description": "Add a rule permitting TCP 80 from outside to DMZ web server 198.51.100.10",
-          "expected": ["access-list OUT2DMZ permit tcp any host 198.51.100.10 eq 80", "access-list OUT2DMZ permit tcp any host 198.51.100.10 eq 80\n"],
+          "expected": ["access-list OUT2DMZ permit tcp any host 198.51.100.10 eq 80"],
           "success_output": "HTTP allow rule created."
         },
         {
@@ -60,8 +42,8 @@
           "success_output": "SSH allow rule created."
         }
       ]
-    }
-    ,
+    },
+
     {
       "title": "DHCP Relay and Central Server",
       "description": "Configure interface helper-addresses and create a central DHCP pool; validate with simulated client DHCP discovery.",
@@ -69,18 +51,18 @@
         {
           "title": "Configure helper on SVI",
           "description": "On SVI VLAN 30 add helper to point at DHCP server 10.0.0.5",
-          "expected": ["interface vlan 30\n ip helper-address 10.0.0.5", "interface vlan 30\nip helper-address 10.0.0.5"],
+          "expected": ["interface vlan 30\\n ip helper-address 10.0.0.5"],
           "success_output": "Helper-address configured on VLAN 30."
         },
         {
           "title": "Create central DHCP pool",
           "description": "Create DHCP pool for 10.0.30.0/24 on server configuration (simulated)",
-          "expected": ["ip dhcp pool GUEST\n network 10.0.30.0 255.255.255.0\n default-router 10.0.30.1"],
+          "expected": ["ip dhcp pool GUEST\\n network 10.0.30.0 255.255.255.0\\n default-router 10.0.30.1"],
           "success_output": "Central DHCP pool created."
         }
       ]
-    }
-    ,
+    },
+
     {
       "title": "DNS Troubleshooting Lab",
       "description": "Investigate a DNS resolution failure: query server, check firewall, and fix missing host record.",
@@ -94,7 +76,7 @@
         {
           "title": "Add missing A record",
           "description": "Add an A record for www.example.com pointing to 10.0.10.20 on the DNS server",
-          "expected": ["www IN A 10.0.10.20", "www A 10.0.10.20"],
+          "expected": ["www IN A 10.0.10.20"],
           "success_output": "A record added; DNS server reloaded."
         },
         {
@@ -104,6 +86,530 @@
           "success_output": "DNS resolution now returns 10.0.10.20."
         }
       ]
+    },
+
+    {
+      "title": "Interconnected Routers with DNS Server",
+      "description": "Goal: Configure two routers, connected by a routed link, each with a managed switch and two PCs. Router B's switch hosts a DNS server that must serve both networks.",
+      "diagram": {
+        "nodes": [
+          {"id": "RA", "label": "Router-A", "x": 220, "y": 60},
+          {"id": "RB", "label": "Router-B", "x": 420, "y": 60},
+          {"id": "SWA", "label": "Switch-A", "x": 160, "y": 180},
+          {"id": "SWB", "label": "Switch-B", "x": 480, "y": 180},
+          {"id": "DNS", "label": "DNS Server\\n10.0.20.10", "x": 560, "y": 260},
+          {"id": "PC_A1", "label": "PC A1", "x": 100, "y": 240},
+          {"id": "PC_A2", "label": "PC A2", "x": 220, "y": 240},
+          {"id": "PC_B1", "label": "PC B1", "x": 440, "y": 240},
+          {"id": "PC_B2", "label": "PC B2", "x": 520, "y": 240}
+        ],
+        "links": [
+          ["SWA","RA"], ["RA","RB"], ["RB","SWB"], ["SWB","DNS"], ["SWA","PC_A1"], ["SWA","PC_A2"], ["SWB","PC_B1"], ["SWB","PC_B2"]
+        ]
+      },
+      "simulated": {
+        "ping 10.0.20.10": "reply",
+        "nslookup www.example.com 10.0.20.10": "answer:10.0.20.10"
+      },
+      "steps": [
+        {
+          "title": "Configure VLANs on switches",
+          "description": "On Sw-A create VLAN 10 and on Sw-B create VLAN 20. Assign PC access ports.",
+          "expected": [
+            "vlan 10\\n name DATA", 
+            "vlan 20\\n name DATA"
+          ],
+          "success_output": "VLANs created on both switches."
+        },
+        {
+          "title": "Configure router subinterfaces or SVIs",
+          "description": "On Router-A create subinterface Gi0/0.10 (10.0.10.1/24). On Router-B create Gi0/0.20 (10.0.20.1/24). Configure encapsulation dot1q.",
+          "expected": [
+            "interface gigabitEthernet0/0.10\\n encapsulation dot1q 10\\n ip address 10.0.10.1 255.255.255.0",
+            "interface gigabitEthernet0/0.20\\n encapsulation dot1q 20\\n ip address 10.0.20.1 255.255.255.0"
+          ],
+          "success_output": "Router subinterfaces created and IPs assigned."
+        },
+        {
+          "title": "Configure routing between Router-A and Router-B",
+          "description": "Add static routes or a routing protocol so 10.0.10.0/24 and 10.0.20.0/24 can reach each other.",
+          "expected": [
+            "ip route 10.0.20.0 255.255.255.0 <next-hop>",
+            "ip route 10.0.10.0 255.255.255.0 <next-hop>"
+          ],
+          "success_output": "Routing in place between routers."
+        },
+        {
+          "title": "Configure DNS server and records",
+          "description": "On the DNS server add A records for hostnames in both VLANs and point to 10.0.20.10 (server IP).",
+          "expected": ["www IN A 10.0.20.10", "hostA IN A 10.0.10.11", "hostB IN A 10.0.20.12"],
+          "success_output": "DNS records created and service started."
+        },
+        {
+          "title": "Validate from PCs",
+          "description": "From PC A1 and PC B1 run: ping 10.0.20.10 and nslookup www.example.com 10.0.20.10",
+          "expected": ["ping 10.0.20.10", "nslookup www.example.com 10.0.20.10"],
+          "success_output": "PCs can ping and resolve via the central DNS server."
+        }
+      ]
+    },
+
+    {
+      "title": "Inter-VLAN Routing and Voice DHCP",
+      "description": "Goal: Configure a router-on-a-stick to support Data VLAN and Voice VLAN, create DHCP pools (including option 150) for phones, and verify phone provisioning.",
+      "diagram": {
+        "nodes": [
+          {"id": "R", "label": "Router", "x": 320, "y": 60},
+          {"id": "SW", "label": "Switch", "x": 320, "y": 180},
+          {"id": "Phone", "label": "IP Phone", "x": 260, "y": 260},
+          {"id": "PC", "label": "PC", "x": 380, "y": 260},
+          {"id": "TFTP", "label": "TFTP/Provision\\n10.0.0.10", "x": 480, "y": 60}
+        ],
+        "links": [["SW","R"],["SW","Phone"],["SW","PC"],["R","TFTP"]]
+      },
+      "simulated": {
+        "ping 10.0.0.10": "reply",
+        "show ip dhcp binding": "binding: phone->10.0.20.45"
+      },
+      "steps": [
+        {
+          "title": "Create VLANs and trunk",
+          "description": "On switch create VLAN 10 and 20 and configure trunk to router interface.",
+          "expected": ["vlan 10\\n name DATA", "vlan 20\\n name VOICE", "interface gigabitEthernet0/1\\n switchport mode trunk"],
+          "success_output": "VLANs and trunk configured."
+        },
+        {
+          "title": "Router subinterfaces",
+          "description": "Create Gi0/0.10 and Gi0/0.20 with appropriate IPs.",
+          "expected": ["interface gigabitEthernet0/0.10\\n encapsulation dot1q 10\\n ip address 10.0.10.1 255.255.255.0", "interface gigabitEthernet0/0.20\\n encapsulation dot1q 20\\n ip address 10.0.20.1 255.255.255.0"],
+          "success_output": "Subinterfaces created."
+        },
+        {
+          "title": "Create DHCP pools",
+          "description": "Create DHCP pool for DATA and VOICE (option 150 for TFTP).",
+          "expected": ["ip dhcp pool DATA\\n network 10.0.10.0 255.255.255.0\\n default-router 10.0.10.1", "ip dhcp pool VOICE\\n network 10.0.20.0 255.255.255.0\\n default-router 10.0.20.1\\n option 150 ip 10.0.0.10"],
+          "success_output": "DHCP pools created; phones should receive option 150."
+        },
+        {
+          "title": "Verify phone DHCP",
+          "description": "From a simulated phone, run: show dhcp lease or check assigned IP and TFTP server.",
+          "expected": ["show ip dhcp binding", "ping 10.0.0.10"],
+          "success_output": "Phone received IP and can reach TFTP server."
+        }
+      ]
+    },
+
+    {
+      "title": "ACL and Access Restriction Lab",
+      "description": "Goal: Implement ACLs on a router to allow only DNS and HTTP from a user subnet to a server, deny everything else, and verify with pings and connection tests.",
+      "diagram": {
+        "nodes": [
+          {"id": "USR", "label": "User Subnet", "x": 160, "y": 120},
+          {"id": "RT", "label": "Router", "x": 320, "y": 120},
+          {"id": "SRV", "label": "Server Subnet\\n(10.2.2.10)", "x": 480, "y": 120}
+        ],
+        "links": [["USR","RT"],["RT","SRV"]]
+      },
+      "simulated": {
+        "curl http://10.2.2.10": "http:200 OK",
+        "nslookup www.example.com 10.2.2.10": "answer:10.2.2.10"
+
+      },
+      "steps": [
+        {
+          "title": "Create ACL to permit DNS and HTTP",
+          "description": "Create standard/extended ACL permitting tcp 80 and udp/tcp 53 from user subnet to server and deny others.",
+          "expected": ["ip access-list extended USER_TO_SRV\\n permit tcp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 80\\n permit udp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 53\\n permit tcp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 53\\n deny ip any any"],
+          "success_output": "ACL created."
+        },
+        {
+          "title": "Apply ACL to interface",
+          "description": "Apply the ACL in the correct direction on the router interface facing users.",
+          "expected": ["interface gigabitEthernet0/1\\n ip access-group USER_TO_SRV in"],
+          "success_output": "ACL applied to user-facing interface."
+        },
+        {
+          "title": "Verify access",
+          "description": "From a user host attempt: ping server, curl http://10.2.2.10, and dig @10.2.2.10 www.example.com",
+          "expected": ["ping 10.2.2.10", "curl http://10.2.2.10", "nslookup www.example.com 10.2.2.10"],
+          "success_output": "DNS and HTTP succeed; ICMP may be denied depending on ACL."
+        }
+      ]
+    },
+    {
+      "title": "NAT Overload Verification",
+      "description": "Configure PAT and verify multiple inside hosts can reach the internet using one public IP.",
+      "steps": [
+        {
+          "title": "Mark inside/outside and ACL",
+          "description": "Set ip nat inside/outside on appropriate interfaces and create ACL for inside networks.",
+          "expected": ["interface GigabitEthernet0/0\\n ip nat outside", "interface GigabitEthernet0/1\\n ip nat inside", "access-list 10 permit 10.0.0.0 0.0.0.255"],
+          "success_output": "NAT interfaces and ACL configured."
+        },
+        {
+          "title": "Configure PAT",
+          "description": "Create ip nat inside source list using interface overload.",
+          "expected": ["ip nat inside source list 10 interface GigabitEthernet0/0 overload"],
+          "success_output": "PAT configured and active."
+        },
+        {
+          "title": "Verify translations",
+          "description": "Run show ip nat translations and check traffic counters.",
+          "expected": ["show ip nat translations", "show ip nat statistics"],
+          "success_output": "Translations present for inside hosts."
+        }
+      ],
+      "simulated": {
+        "show ip nat translations": "10.0.0.10:12345 -> 203.0.113.10:54321\\n10.0.0.11:12346 -> 203.0.113.10:54322",
+        "show ip nat statistics": "Total translations: 2"
+      }
+    },
+
+    {
+      "title": "IPsec Tunnel Verification",
+      "description": "Basic site-to-site IPsec tunnel bring-up and verification (pre-shared key example).",
+      "steps": [
+        {"title":"Define IKE/ISAKMP","expected":["crypto isakmp policy 10"],"success_output":"ISAKMP policy created."},
+        {"title":"Set PSK and crypto map","expected":["crypto isakmp key SECRET address 198.51.100.2","crypto map CM 10 ipsec-isakmp"],"success_output":"PSK and crypto map set."},
+        {"title":"Verify tunnel","expected":["show crypto isakmp sa","show crypto ipsec sa"],"success_output":"SAs established and packets encrypted."}
+      ],
+      "simulated": {"show crypto isakmp sa": "MM_KEY_EXCHANGE State: QM_IDLE\\nPeer 198.51.100.2", "show crypto ipsec sa": "interface: GigabitEthernet0/0, Crypto map tag: CM, #pkts encaps: 10"}
+    },
+
+    {
+      "title": "BGP Peering and Advertisement Lab",
+      "description": "Establish an eBGP session and advertise a specific prefix; verify neighbor and advertised routes.",
+      "steps": [
+        {"title":"Configure BGP neighbor","expected":["router bgp 65000"," neighbor 203.0.113.2 remote-as 65001"],"success_output":"BGP neighbor configured."},
+        {"title":"Advertise network","expected":["network 10.100.0.0 mask 255.255.255.0"],"success_output":"Network advertised to neighbor."},
+        {"title":"Verify BGP","expected":["show ip bgp summary","show ip bgp 10.100.0.0"],"success_output":"BGP session up and prefix present in table."}
+      ],
+      "simulated": {"show ip bgp summary": "Neighbor 203.0.113.2 State/PfxRcd 4/1", "show ip bgp 10.100.0.0": "*> 10.100.0.0/24 0.0.0.0"}
+    },
+
+    {
+      "title": "Enable SNMP and Test Polling",
+      "description": "Enable SNMPv2c and SNMPv3 user, configure a collector host and verify read access.",
+      "steps": [
+        {"title":"Configure SNMP community and host","expected":["snmp-server community MONRO ro 10","snmp-server host 192.0.2.5 version 2c MONRO"],"success_output":"SNMPv2 community and host configured."},
+        {"title":"Configure SNMPv3 user","expected":["snmp-server group SECLOCAL v3 priv","snmp-server user admin SECLOCAL v3 auth sha AuthPass priv aes 128 PrivPass"],"success_output":"SNMPv3 user and group configured."},
+        {"title":"Verify","expected":["show snmp user","show snmp group"],"success_output":"SNMP users and groups present."}
+      ],
+      "simulated": {"show snmp user":"User: admin, security model: v3", "show snmp group":"Group: SECLOCAL, v3, priv"}
+    },
+
+    {
+      "title": "MPLS LDP Neighbor Bringup",
+      "description": "Enable MPLS on core interfaces and verify LDP neighbor adjacencies and label bindings.",
+      "steps": [
+        {"title":"Enable MPLS on interface","expected":["mpls ip","interface GigabitEthernet0/0\\n mpls ip"],"success_output":"MPLS enabled on interface."},
+        {"title":"Enable LDP and verify neighbors","expected":["mpls ldp router-id Loopback0 force","show mpls ldp neighbor"],"success_output":"LDP neighbors discovered."},
+        {"title":"Verify forwarding table","expected":["show mpls forwarding-table"],"success_output":"Label bindings present."}
+      ],
+      "simulated": {"show mpls ldp neighbor":"Peer 10.0.0.2 LDP id: 10.0.0.2:0, State: Oper", "show mpls forwarding-table":"10.0.10.0/24 via label 16000"}
+    },
+
+    {
+      "title": "VXLAN EVPN Minimal Verification",
+      "description": "Conceptual verification of VXLAN EVPN mapping: configure VNI and NVE, verify VNI and EVPN routes.",
+      "steps": [
+        {"title":"Create VLAN and VNI mapping","expected":["vlan 10"," vn-segment 1010"],"success_output":"VLAN and VNI mapped."},
+        {"title":"Configure NVE/VTEP basic","expected":["interface nve1\\n source-interface loopback0"," member vni 1010"],"success_output":"NVE configured."},
+        {"title":"Verify EVPN/VNI","expected":["show evpn vni","show nve peers"],"success_output":"EVPN VNI present and peers listed."}
+      ],
+      "simulated": {"show evpn vni":"VNI 1010: state up", "show nve peers":"Peer 10.0.0.11, VNI 1010"}
+    },
+
+    {
+      "title": "Basic Router Initial Setup",
+      "description": "Configure a router from scratch: set hostname, secure console/VTY access with passwords, configure a login banner, and save the configuration.",
+      "difficulty": "beginner",
+      "diagram": {
+        "nodes": [
+          {"id": "R1", "label": "Router", "x": 200, "y": 80},
+          {"id": "CONSOLE", "label": "Console PC", "x": 80, "y": 180},
+          {"id": "SW", "label": "Switch", "x": 320, "y": 180}
+        ],
+        "links": [["CONSOLE","R1"],["R1","SW"]]
+      },
+      "steps": [
+        {
+          "title": "Set hostname",
+          "description": "Enter global configuration mode and set the router hostname to 'R1'.",
+          "expected": ["enable", "configure terminal", "hostname R1"],
+          "success_output": "Hostname set to R1."
+        },
+        {
+          "title": "Secure privileged EXEC mode",
+          "description": "Set an encrypted enable secret password 'cisco123'.",
+          "expected": ["enable secret cisco123"],
+          "success_output": "Enable secret configured."
+        },
+        {
+          "title": "Secure console access",
+          "description": "Configure the console line with password 'console123' and require login.",
+          "expected": ["line console 0", "password console123", "login"],
+          "success_output": "Console line secured."
+        },
+        {
+          "title": "Secure VTY (Telnet/SSH) access",
+          "description": "Configure VTY lines 0-4 with password 'vty123' and require login.",
+          "expected": ["line vty 0 4", "password vty123", "login"],
+          "success_output": "VTY lines secured."
+        },
+        {
+          "title": "Configure login banner",
+          "description": "Set a message-of-the-day banner warning unauthorized users.",
+          "expected": ["banner motd #Authorized Access Only#", "banner motd # Authorized Access Only #"],
+          "success_output": "MOTD banner configured."
+        },
+        {
+          "title": "Save configuration",
+          "description": "Save the running configuration to startup-config (NVRAM).",
+          "expected": ["copy running-config startup-config", "write memory", "wr"],
+          "success_output": "Configuration saved to NVRAM."
+        }
+      ],
+      "simulated": {
+        "show running-config | include hostname": "hostname R1",
+        "show running-config | include enable secret": "enable secret 5 $1$...",
+        "show startup-config": "[Configuration saved]"
+      }
+    },
+
+    {
+      "title": "Switch Port Security",
+      "description": "Enable port security on a switch port to limit the number of MAC addresses and define violation actions to protect against unauthorized devices.",
+      "difficulty": "beginner",
+      "diagram": {
+        "nodes": [
+          {"id": "SW", "label": "Switch", "x": 200, "y": 80},
+          {"id": "PC1", "label": "Authorized PC", "x": 100, "y": 180},
+          {"id": "PC2", "label": "Rogue Device", "x": 300, "y": 180}
+        ],
+        "links": [["PC1","SW"],["PC2","SW"]]
+      },
+      "steps": [
+        {
+          "title": "Access the interface",
+          "description": "Enter interface configuration for GigabitEthernet0/1.",
+          "expected": ["interface gigabitEthernet0/1", "interface gi0/1"],
+          "success_output": "Entered interface configuration mode."
+        },
+        {
+          "title": "Set port to access mode",
+          "description": "Configure the port as an access port (required for port security).",
+          "expected": ["switchport mode access"],
+          "success_output": "Port set to access mode."
+        },
+        {
+          "title": "Enable port security",
+          "description": "Enable port security on the interface.",
+          "expected": ["switchport port-security"],
+          "success_output": "Port security enabled."
+        },
+        {
+          "title": "Set maximum MAC addresses",
+          "description": "Limit the port to allow only 1 MAC address.",
+          "expected": ["switchport port-security maximum 1"],
+          "success_output": "Maximum MAC addresses set to 1."
+        },
+        {
+          "title": "Configure violation action",
+          "description": "Set the violation mode to 'shutdown' - port will be disabled if a second MAC is detected.",
+          "expected": ["switchport port-security violation shutdown"],
+          "success_output": "Violation mode set to shutdown."
+        },
+        {
+          "title": "Enable sticky MAC learning",
+          "description": "Configure the switch to dynamically learn and save the MAC address.",
+          "expected": ["switchport port-security mac-address sticky"],
+          "success_output": "Sticky MAC learning enabled."
+        },
+        {
+          "title": "Verify port security",
+          "description": "Check the port security status and learned MAC addresses.",
+          "expected": ["show port-security interface gi0/1", "show port-security address"],
+          "success_output": "Port security status displayed."
+        }
+      ],
+      "simulated": {
+        "show port-security interface gi0/1": "Port Security: Enabled\\nPort Status: Secure-up\\nViolation Mode: Shutdown\\nMaximum MAC Addresses: 1\\nSticky MAC Addresses: 1",
+        "show port-security address": "Gi0/1  0011.2233.4455  SecureSticky"
+      }
+    },
+
+    {
+      "title": "Static Routing Fundamentals",
+      "description": "Configure static routes on a router to enable communication between two networks that are not directly connected.",
+      "difficulty": "beginner",
+      "diagram": {
+        "nodes": [
+          {"id": "PC_A", "label": "PC-A\\n192.168.1.10", "x": 60, "y": 120},
+          {"id": "R1", "label": "Router-1\\n192.168.1.1 | 10.0.0.1", "x": 200, "y": 120},
+          {"id": "R2", "label": "Router-2\\n10.0.0.2 | 192.168.2.1", "x": 380, "y": 120},
+          {"id": "PC_B", "label": "PC-B\\n192.168.2.10", "x": 520, "y": 120}
+        ],
+        "links": [["PC_A","R1"],["R1","R2"],["R2","PC_B"]]
+      },
+      "steps": [
+        {
+          "title": "View the routing table",
+          "description": "On Router-1, display the current routing table to see directly connected networks.",
+          "expected": ["show ip route"],
+          "success_output": "Routing table displayed - shows connected networks only."
+        },
+        {
+          "title": "Add static route on Router-1",
+          "description": "Configure a static route to reach the 192.168.2.0/24 network via Router-2's interface (10.0.0.2).",
+          "expected": ["ip route 192.168.2.0 255.255.255.0 10.0.0.2"],
+          "success_output": "Static route to 192.168.2.0/24 added."
+        },
+        {
+          "title": "Add static route on Router-2",
+          "description": "Configure a static route to reach the 192.168.1.0/24 network via Router-1's interface (10.0.0.1).",
+          "expected": ["ip route 192.168.1.0 255.255.255.0 10.0.0.1"],
+          "success_output": "Static route to 192.168.1.0/24 added."
+        },
+        {
+          "title": "Verify routing table",
+          "description": "Check the routing table on Router-1 to confirm the static route is present (marked with 'S').",
+          "expected": ["show ip route", "show ip route static"],
+          "success_output": "Static route visible in routing table."
+        },
+        {
+          "title": "Test connectivity",
+          "description": "From Router-1, ping PC-B (192.168.2.10) to verify end-to-end connectivity.",
+          "expected": ["ping 192.168.2.10"],
+          "success_output": "Ping successful - static routing is working!"
+        }
+      ],
+      "simulated": {
+        "show ip route": "C  192.168.1.0/24 is directly connected, Gi0/0\\nC  10.0.0.0/24 is directly connected, Gi0/1\\nS  192.168.2.0/24 [1/0] via 10.0.0.2",
+        "show ip route static": "S  192.168.2.0/24 [1/0] via 10.0.0.2",
+        "ping 192.168.2.10": "!!!!!\\nSuccess rate is 100 percent (5/5)"
+      }
+    },
+
+    {
+      "title": "Backup and Restore Configuration",
+      "description": "Learn to save, backup, and restore router/switch configurations using copy commands and a TFTP server.",
+      "difficulty": "beginner",
+      "diagram": {
+        "nodes": [
+          {"id": "R1", "label": "Router", "x": 200, "y": 80},
+          {"id": "TFTP", "label": "TFTP Server\\n192.168.1.100", "x": 380, "y": 80},
+          {"id": "SW", "label": "Switch", "x": 200, "y": 180}
+        ],
+        "links": [["R1","TFTP"],["R1","SW"]]
+      },
+      "steps": [
+        {
+          "title": "View running configuration",
+          "description": "Display the current running configuration to review before backup.",
+          "expected": ["show running-config"],
+          "success_output": "Running configuration displayed."
+        },
+        {
+          "title": "Save to startup-config",
+          "description": "Copy the running configuration to startup-config (NVRAM) so it persists after reboot.",
+          "expected": ["copy running-config startup-config", "write memory", "wr"],
+          "success_output": "Configuration saved to NVRAM."
+        },
+        {
+          "title": "Backup to TFTP server",
+          "description": "Copy the running configuration to a TFTP server at 192.168.1.100.",
+          "expected": ["copy running-config tftp://192.168.1.100/router-backup.cfg", "copy running-config tftp"],
+          "success_output": "Configuration backed up to TFTP server."
+        },
+        {
+          "title": "View startup configuration",
+          "description": "Verify the startup-config matches the running-config.",
+          "expected": ["show startup-config"],
+          "success_output": "Startup configuration displayed."
+        },
+        {
+          "title": "Restore from TFTP",
+          "description": "Restore a configuration from the TFTP server to running-config.",
+          "expected": ["copy tftp://192.168.1.100/router-backup.cfg running-config", "copy tftp running-config"],
+          "success_output": "Configuration restored from TFTP."
+        },
+        {
+          "title": "Erase startup-config (optional)",
+          "description": "If needed, erase the startup configuration to reset the device to factory defaults.",
+          "expected": ["write erase", "erase startup-config"],
+          "success_output": "Startup configuration erased. Reload to apply."
+        }
+      ],
+      "simulated": {
+        "show running-config": "[Current configuration displayed]",
+        "show startup-config": "[Startup configuration displayed]",
+        "copy running-config tftp://192.168.1.100/router-backup.cfg": "Writing router-backup.cfg... [OK]",
+        "copy tftp://192.168.1.100/router-backup.cfg running-config": "Loading router-backup.cfg from 192.168.1.100... [OK]"
+      }
+    },
+
+    {
+      "title": "Basic Interface Troubleshooting",
+      "description": "Learn fundamental commands to troubleshoot interface issues: check status, verify IP configuration, identify speed/duplex mismatches, and view error counters.",
+      "difficulty": "beginner",
+      "diagram": {
+        "nodes": [
+          {"id": "R1", "label": "Router\\nGi0/0: 192.168.1.1", "x": 200, "y": 80},
+          {"id": "SW", "label": "Switch\\nGi0/1", "x": 200, "y": 180},
+          {"id": "PC", "label": "PC\\n192.168.1.10", "x": 200, "y": 280}
+        ],
+        "links": [["R1","SW"],["SW","PC"]]
+      },
+      "steps": [
+        {
+          "title": "Check interface status summary",
+          "description": "View a brief summary of all interfaces showing status (up/down) and protocol state.",
+          "expected": ["show ip interface brief"],
+          "success_output": "Interface summary displayed."
+        },
+        {
+          "title": "View detailed interface status",
+          "description": "Check detailed information for GigabitEthernet0/0 including speed, duplex, and line protocol.",
+          "expected": ["show interface gigabitEthernet0/0", "show interface gi0/0"],
+          "success_output": "Detailed interface information displayed."
+        },
+        {
+          "title": "Check for interface errors",
+          "description": "Look for input/output errors, CRC errors, collisions, and other counters that indicate problems.",
+          "expected": ["show interface gi0/0 | include errors", "show interface gi0/0"],
+          "success_output": "Error counters displayed."
+        },
+        {
+          "title": "Verify IP address configuration",
+          "description": "Confirm the IP address and subnet mask configured on the interface.",
+          "expected": ["show ip interface gi0/0", "show running-config interface gi0/0"],
+          "success_output": "IP configuration verified."
+        },
+        {
+          "title": "Bring up a down interface",
+          "description": "If an interface is administratively down, enable it with 'no shutdown'.",
+          "expected": ["interface gi0/0", "no shutdown"],
+          "success_output": "Interface enabled."
+        },
+        {
+          "title": "Set speed and duplex manually",
+          "description": "If there's a duplex mismatch, manually configure speed and duplex (or set to auto).",
+          "expected": ["interface gi0/0", "speed auto", "duplex auto"],
+          "success_output": "Speed and duplex configured."
+        },
+        {
+          "title": "Clear interface counters",
+          "description": "Reset the error counters to monitor for new issues after a fix.",
+          "expected": ["clear counters gi0/0"],
+          "success_output": "Interface counters cleared."
+        }
+      ],
+      "simulated": {
+        "show ip interface brief": "Interface       IP-Address      Status    Protocol\\nGi0/0           192.168.1.1     up        up\\nGi0/1           unassigned      down      down",
+        "show interface gi0/0": "GigabitEthernet0/0 is up, line protocol is up\\n  Hardware is Gigabit Ethernet\\n  Internet address is 192.168.1.1/24\\n  MTU 1500 bytes, BW 1000000 Kbit\\n  Full-duplex, 1000Mb/s\\n  5 minute input rate 1000 bits/sec\\n  0 input errors, 0 CRC, 0 frame",
+        "show ip interface gi0/0": "GigabitEthernet0/0 is up, line protocol is up\\n  Internet address is 192.168.1.1/24\\n  Broadcast address is 255.255.255.255"
+      }
     }
   ]
 }

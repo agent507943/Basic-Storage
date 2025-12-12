@@ -1,0 +1,237 @@
+" channel-group 1 mode active",
+" channel-group 10 mode active",
+" deny ip any any",
+" ip access-group mgmt_only in"
+" ip address 10.10.10.1 255.255.255.0",
+" ip address 10.10.20.1 255.255.255.0",
+" ip address 10.10.30.1 255.255.255.0"
+" ip address 10.255.255.2 255.255.255.0",
+" ip address 172.16.10.1 255.255.255.0",
+" ip address 172.16.20.1 255.255.255.0",
+" ip address 203.0.113.1 255.255.255.252",
+" ip address 203.0.113.2 255.255.255.252",
+" ip ospf authentication message-digest",
+" ip ospf message-digest-key 1 md5 very$ecurekey",
+" switchport access vlan 10",
+" switchport mode access",
+" switchport mode trunk",
+" switchport trunk allowed vlan 10,20",
+" switchport trunk allowed vlan 10,20,30",
+" switchport trunk encapsulation dot1q",
+"! on router-a on the wan interface",
+"access-list mgmt permit tcp 10.1.1.0 255.255.255.0 any eq 22",
+"access-list mgmt permit tcp 10.1.1.0 255.255.255.0 any eq 22\n"
+"answer": "access-list mgmt permit tcp 10.1.1.0 255.255.255.0 any eq 22",
+"answer": "check show ip bgp summary and show ip bgp neighbors; inspect tcp resets and packet captures; verify route policies and route-refresh; review syslogs",
+"answer": "create an access-list matching the subnet, a route-map setting next-hop to backup isp, and apply it with `ip policy route-map` on the ingress interface",
+"answer": "create vlan 10, configure svi, migrate access ports in small batches, update dhcp scopes, monitor arp and connectivity",
+"answer": "interface range gi0/1-2\n channel-group 1 mode active",
+"answer": "interface vlan 10\n ip address 10.0.10.1 255.255.255.0",
+"answer": "ip access-list extended web\n permit tcp 10.0.1.0 0.0.0.255 host 10.0.2.10 eq 80\n permit tcp 10.0.1.0 0.0.0.255 host 10.0.2.10 eq 443",
+"answer": "ip dhcp pool voice\n network 10.0.20.0 255.255.255.0\n default-router 10.0.20.1\n option 150 ip 10.0.0.10",
+"answer": "ip helper-address 10.0.0.5",
+"answer": "router bgp 65000\n redistribute ospf 1 route-map ospf-into-bgp",
+"answer": "show ip bgp summary",
+"answer": "show ip dhcp binding",
+"answer": "show ip interface brief",
+"answer": "show ip nat translations",
+"answer": "show ip ospf neighbor",
+"answer": "show ip route",
+"answer": "show spanning-tree",
+"answer": "show vlan brief",
+"answer": "switchport mode trunk",
+"answer": "use dig/nslookup to query the dns server, then use packet captures and firewall logs to identify blocked dns or tcp/udp 53 traffic",
+"answer": "use route-maps and route-tags to filter redistributed routes and avoid re-injecting the same routes back into the source protocol",
+"answer": "username admin privilege 15 secret myp@ss\n aaa new-model\n aaa authentication login default local",
+"check show ip bgp summary and show ip bgp neighbors; inspect tcp resets and packet captures; verify route policies and route-refresh; review syslogs",
+"choices": ["configure terminal", "enable", "interface", "privileged exec"],
+"choices": ["interface range gi0/1-2\n channel-group 1 mode active", "interface range gi0/1-2\n channel-group 1 mode on", "interface port-channel 1\n switchport mode trunk", "interface gi0/1\n channel-group 1 mode passive"],
+"choices": ["interface vlan 10\n ip address 10.0.10.1 255.255.255.0", "interface gigabitethernet0/1\n switchport access vlan 10", "vlan 10\n name data", "ip route 10.0.10.0 255.255.255.0 10.0.0.1"],
+"choices": ["ip helper-address 10.0.0.5", "ip dhcp relay 10.0.0.5", "dhcp relay 10.0.0.5", "ip helper 10.0.0.5"],
+"choices": ["permit tcp from any to 198.51.100.10 eq 80; apply to outside->dmz policy", "permit ip any any; apply to outside", "deny ip any any; then add permit for web", "configure nat only"],
+"choices": ["router bgp 65000\n redistribute ospf 1 route-map ospf-into-bgp", "router ospf 1\n redistribute bgp 65000 subnets", "ip route 0.0.0.0 0.0.0.0 null0", "bgp redistribute ospf 1"],
+"choices": ["show ip bgp summary", "show ip bgp neighbors", "show bgp routes all", "show ip bgp community"],
+"choices": ["show ip dhcp binding", "show dhcp leases", "show ip leases", "show running-config | include dhcp"],
+"choices": ["show ip interface brief", "show interfaces status", "show run interface", "show ip route summary"],
+"choices": ["show ip nat translations", "show nat translations", "show ip nat statistics", "show ip translation"],
+"choices": ["show ip ospf neighbor", "show ip ospf database", "show ip route ospf", "show ospf status"],
+"choices": ["show ip route", "show running-config", "show interfaces", "show ip interface brief"],
+"choices": ["show spanning-tree", "show stp status", "show spanning root", "show spanning-tree details"],
+"choices": ["show vlan brief", "show ip vlan", "show vlan switch", "show interfaces vlan"],
+"choices": ["switchport mode trunk", "switchport mode access", "encapsulation dot1q", "ip address trunk"],
+"choices": ["take a backup of the running-config and boot image", "clear the arp table", "disable routing protocols", "remove all vlans"],
+"choices": ["username admin privilege 15 secret myp@ss\n aaa new-model\n aaa authentication login default local", "enable secret myp@ss\n login local", "line vty 0 4\n login local", "service password-encryption"],
+"choices": ["write memory", "show startup-config", "copy startup-config running-config", "clear running-config"],
+"copy running-config tftp",
+"copy tftp: startup-config",
+"crypto key generate rsa modulus 2048",
+"description": "apply the acl in the correct direction on the router interface facing users.",
+"description": "configure interface gigabitethernet0/1 as access for vlan 10.",
+"description": "configure interface helper-addresses and create a central dhcp pool; validate with simulated client dhcp discovery.",
+"description": "configure vlans, an svi and assign access ports for a basic access switch.",
+"description": "create svi interface vlan 10 and assign ip 10.0.10.2/24.",
+"description": "create vlan 10 (data) and vlan 20 (voice) on the switch.",
+"description": "from a simulated phone, run: show dhcp lease or check assigned ip and tftp server.",
+"description": "from a user host attempt: ping server, curl http://10.2.2.10, and dig @10.2.2.10 www.example.com",
+"description": "from client, run: nslookup www.example.com 10.0.0.5",
+"description": "from pc a1 and pc b1 run: ping 10.0.20.10 and nslookup www.example.com 10.0.20.10",
+"description": "goal: configure a router-on-a-stick to support data vlan and voice vlan, create dhcp pools (including option 150) for phones, and verify phone provisioning.",
+"description": "goal: configure two routers, connected by a routed link, each with a managed switch and two pcs. router b's switch hosts a dns server that must serve both networks.",
+"description": "goal: implement acls on a router to allow only dns and http from a user subnet to a server, deny everything else, and verify with pings and connection tests.",
+"description": "on router-a create subinterface gi0/0.10 (10.0.10.1/24). on router-b create gi0/0.20 (10.0.20.1/24). configure encapsulation dot1q.",
+"description": "on svi vlan 30 add helper to point at dhcp server 10.0.0.5",
+"description": "on sw-a create vlan 10 and on sw-b create vlan 20. assign pc access ports.",
+"description": "on switch create vlan 10 and 20 and configure trunk to router interface.",
+"description": "on the dns server add a records for hostnames in both vlans and point to 10.0.20.10 (server ip).",
+"expected": ["access-list out2dmz permit tcp any host 198.51.100.10 eq 80"],
+"expected": ["access-list out2mgmt permit tcp 10.1.1.0 255.255.255.0 host 198.51.100.11 eq 22"],
+"expected": ["interface gigabitethernet0/0.10\\n encapsulation dot1q 10\\n ip address 10.0.10.1 255.255.255.0", "interface gigabitethernet0/0.20\\n encapsulation dot1q 20\\n ip address 10.0.20.1 255.255.255.0"],
+"expected": ["interface gigabitethernet0/1\\n ip access-group user_to_srv in"],
+"expected": ["interface gigabitethernet0/1\\n switchport mode access\\n switchport access vlan 10"],
+"expected": ["interface vlan 10\\n ip address 10.0.10.2 255.255.255.0"],
+"expected": ["interface vlan 30\\n ip helper-address 10.0.0.5"],
+"expected": ["ip access-list extended user_to_srv\\n permit tcp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 80\\n permit udp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 53\\n permit tcp 10.1.1.0 0.0.0.255 host 10.2.2.10 eq 53\\n deny ip any any"],
+"expected": ["ip dhcp pool data\\n network 10.0.10.0 255.255.255.0\\n default-router 10.0.10.1", "ip dhcp pool voice\\n network 10.0.20.0 255.255.255.0\\n default-router 10.0.20.1\\n option 150 ip 10.0.0.10"],
+"expected": ["ip dhcp pool guest\\n network 10.0.30.0 255.255.255.0\\n default-router 10.0.30.1"],
+"expected": ["nslookup www.example.com 10.0.0.5", "dig @10.0.0.5 www.example.com"],
+"expected": ["ping 10.0.20.10", "nslookup www.example.com 10.0.20.10"],
+"expected": ["ping 10.2.2.10", "curl http://10.2.2.10", "nslookup www.example.com 10.2.2.10"],
+"expected": ["show ip dhcp binding", "ping 10.0.0.10"],
+"expected": ["vlan 10\\n name data", "vlan 20\\n name voice", "interface gigabitethernet0/1\\n switchport mode trunk"],
+"expected": ["vlan 10\\nname data", "vlan 20\\nname voice"],
+"expected_output_examples": ["port-channel or gi0/24 should show trunking and allowed vlans 10,20"]
+"explanation": "`ip helper-address` forwards client dhcp broadcasts to a centralized dhcp server."
+"explanation": "`show ip bgp summary` provides neighbor states and prefix counts. for detailed info use `show ip bgp neighbors`."
+"explanation": "`show ip dhcp binding` lists active dhcp bindings (ip, mac, lease time)."
+"explanation": "`show ip interface brief` is commonly used to quickly verify interface ips and up/down status."
+"explanation": "`show ip nat translations` lists active nat translations and mappings."
+"explanation": "`show ip route` displays the routing table and learned routes from connected, static, and dynamic protocols."
+"explanation": "`show spanning-tree` shows root bridge, port roles, costs and stp state on vlans."
+"explanation": "`show vlan brief` lists vlan ids, names and member ports on many cisco switches."
+"explanation": "`switchport mode trunk` sets an interface to carry multiple vlans; `encapsulation dot1q` is used on router subinterfaces."
+"explanation": "`write memory` or `copy running-config startup-config` persists the running configuration to be used on next reboot."
+"explanation": "an `aaaa` record contains an ipv6 address for a hostname."
+"explanation": "an svi is configured under `interface vlan <id>` and assigned an ip for l3 svi reachability."
+"explanation": "dhcp pools are configured with `ip dhcp pool <name>` and include network, default-router and option 150 for phone tftp servers."
+"explanation": "extended acls allow matching on protocols and ports. use `ip access-list extended` for named acls with multiple permit lines."
+"explanation": "in bgp config mode use `redistribute ospf` with a route-map to control and tag redistributed routes."
+"explanation": "named acls on asa/ftd use `access-list <name> permit|deny` followed by protocol/source/mask/destination and port."
+"explanation": "pbr uses route-maps with match and set clauses applied to inbound interfaces to override normal routing for selected traffic."
+"explanation": "renaming vlan 1 is unsafe; best practice is to create a new vlan, configure svi, adjust dhcp, migrate ports in batches and carefully monitor."
+"explanation": "use `channel-group <num> mode active` to create an lacp group; matching settings and speeds must be equal on both ends."
+"full_config_snippet": "hostname agg-sw\ninterface vlan1\n ip address 10.255.255.2 255.255.255.0\n no shutdown\n!\nvlan 10\n name data\n!\ninterface port-channel10\n switchport mode trunk\n switchport trunk allowed vlan 10,20,30\n"
+"full_config_snippet": "hostname switch-01\ninterface vlan1\n ip address 192.168.1.2 255.255.255.0\n no shutdown\n!\nvlan 10\n name data\n!\ninterface gigabitethernet0/1\n switchport mode access\n switchport access vlan 10\n",
+"full_config_snippet": "interface gigabitethernet0/24\n switchport trunk encapsulation dot1q\n switchport mode trunk\n switchport trunk allowed vlan 10,20\n no shutdown\n"
+"full_config_snippet": "vlan 10\n name data\n!\nvlan 20\n name voice\n!\ninterface gigabitethernet0/1\n switchport mode access\n switchport access vlan 10\n no shutdown\n",
+"hostname agg-sw",
+"interface gigabitethernet0/0",
+"interface gigabitethernet0/0.10",
+"interface gigabitethernet0/0.10\\n encapsulation dot1q 10\\n ip address 10.0.10.1 255.255.255.0",
+"interface gigabitethernet0/0.20",
+"interface gigabitethernet0/0.20\\n encapsulation dot1q 20\\n ip address 10.0.20.1 255.255.255.0"
+"interface gigabitethernet0/0.30",
+"interface gigabitethernet0/1",
+"interface gigabitethernet0/1\n switchport access vlan 10\n switchport mode access"
+"interface gigabitethernet0/24",
+"interface gigabitethernet1/0/48",
+"interface port-channel1",
+"interface port-channel10",
+"interface range gigabitethernet1/0/1 - 2",
+"interface vlan1",
+"ip access-list extended mgmt_only",
+"ip default-gateway 10.255.255.1"
+"ip dhcp pool voice\n network 10.0.20.0 255.255.255.0\n default-router 10.0.20.1\n option 150 ip 10.0.0.10",
+"ip dhcp pool voice\nnetwork 10.0.20.0 255.255.255.0\ndefault-router 10.0.20.1\noption 150 ip 10.0.0.10"
+"ip domain-name example.local",
+"ip route 10.0.10.0 255.255.255.0 <next-hop>"
+"ip route 10.0.20.0 255.255.255.0 <next-hop>",
+"ip route 10.1.1.0 255.255.255.0 192.168.100.1"
+"ip route 10.2.2.0 255.255.255.0 192.168.100.2"
+"line vty 0 4",
+"notes": "adjust priorities to control root for specific vlans."
+"notes": "some devices accept `name data` on the same line as `vlan 10` or as a following `name` command."
+"notes": "using `startup-config` will apply the configuration on next reload. `copy tftp: running-config` merges config without reboot (use with care)."
+"nslookup www.example.com 10.0.20.10": "answer:10.0.20.10"
+"nslookup www.example.com 10.2.2.10": "answer:10.2.2.10"
+"objectives": ["backup current config", "copy new config to device", "verify and reload safely"],
+"objectives": ["configure access switches, parent aggregation switch, implement lacp between aggregation and access, tune stp, and map vlans"],
+"objectives": ["configure trunk on switch ports", "allow specific vlans", "verify trunk negotiation (if desirable)"],
+"objectives": ["create vlan 10 (data) and vlan 20 (voice)", "name vlans", "assign access ports to vlans"],
+"objectives": ["set management ip", "create vlans 10/20/30", "configure trunks and port-channels", "set up svis or router-on-a-stick for inter-vlan routing"],
+"ping 10.0.0.10": "reply",
+"ping 10.0.20.10": "reply",
+"ping 10.2.2.1 (from router1) or ping 10.1.1.1 (from router2)",
+"prerequisites": ["access to aggregation switch and router", "basic vlan and trunk knowledge"],
+"prerequisites": ["understanding of vlans, stp, and lacp"],
+"question": "configure a dhcp pool named voice for network 10.0.20.0/24 with default-router 10.0.20.1 and option 150 10.0.0.10 (tftp).",
+"question": "describe a safe process to migrate hosts from vlan 1 to vlan 10 with minimal downtime on a production switch stack.",
+"question": "how do you configure an access-list that permits http and https from a subnet 10.0.1.0/24 to a server 10.0.2.10?",
+"question": "how do you create an interface vlan 10 svi and give it an ip address?",
+"question": "how do you redistribute ospf into bgp (one-way) using route-maps to tag routes?",
+"question": "on a cisco asa/ftd style device, create a named access-list to permit ssh from management subnet 10.1.1.0/24 to any inside host.",
+"question": "what command shows the ip routing table on a cisco ios router?",
+"question": "which command configures a dhcp relay helper address on an interface?",
+"question": "which command configures a trunk on a switch interface (dot1q)?",
+"question": "which command displays interface status and ip addresses in brief form?",
+"question": "which command shows the current vlan database and vlan names on a switch?",
+"question": "which command shows the spanning-tree root and port roles?",
+"question": "which dns record type maps a hostname to an ipv6 address?",
+"question": "which show command gives bgp neighbor route counts and prefixes exchanged?",
+"references": ["https://www.cisco.com/c/en/us/td/docs/switches/lan/campus_lan/vlan.html (vendor docs - conceptual)"]
+"router ospf 1",
+"scenario_description": "aggregation switch (agg) connects to three access switches (acc1, acc2, acc3) each carrying vlans 10,20,30. use lacp to trunk multiple links from acc switches to agg for redundancy and bandwidth.",
+"scenario_description": "router-a (location a, e.g., new york): lan 172.16.10.0/24. router-b (location b, e.g., texas): lan 172.16.20.0/24. inter-router public connection uses /30" ,
+"show interfaces trunk",
+"show ip dhcp binding": "binding: phone->10.0.20.45"
+"show ip route"
+"show running-config interface gigabitethernet0/1"
+"show vlan brief"
+"show vlan brief",
+"spanning-tree mode rapid-pvst",
+"spanning-tree vlan 10 priority 8192",
+"spanning-tree vlan 20 priority 8192"
+"success_output": "acl applied to user-facing interface."
+"success_output": "helper-address configured on vlan 30."
+"success_output": "pcs can ping and resolve via the central dns server."
+"success_output": "phone received ip and can reach tftp server."
+"success_output": "port gi0/1 configured as access vlan 10."
+"success_output": "router subinterfaces created and ips assigned."
+"success_output": "subinterfaces created."
+"success_output": "svi created and ip assigned."
+"success_output": "vlans and trunk configured."
+"success_output": "vlans created on both switches."
+"success_output": "vlans created."
+"summary": "configure an 802.1q trunk between two switches and allow vlans 10 and 20.",
+"summary": "create vlans, name them, and assign access ports on a cisco catalyst switch.",
+"summary": "design and configure a topology where a managed aggregation switch connects to multiple smaller access switches (node clusters). include vlan mapping, spanning-tree considerations, and link aggregation (lacp) examples.",
+"summary": "full example: configure a managed aggregation switch with management ip, create vlans, trunk ports to three access switches, create svis for inter-vlan routing on a connected router, and show verification steps.",
+"summary": "load a configuration file onto a managed switch and apply it safely, including hostname, management ip, and vlans.",
+"tips": "if using `copy tftp: running-config` it merges; using `startup-config` and reload replaces."
+"title": "add vlans to a switch (beginner)",
+"title": "apply acl to interface",
+"title": "assign access port to vlan 10",
+"title": "basic interface and addressing (both routers)",
+"title": "configure a managed switch and connect 3 access switches with multiple vlans (advanced)",
+"title": "configure router subinterfaces or svis",
+"title": "configure vlans on aggregation switch",
+"title": "configure vlans on switches",
+"title": "copy config from tftp to startup-config",
+"title": "create vlans and allowed vlans on trunks",
+"title": "create vlans and trunk",
+"title": "create vlans",
+"title": "enter global config and create vlans",
+"title": "inter-vlan routing and voice dhcp",
+"title": "router subinterfaces",
+"title": "set hostname and management ip",
+"username admin privilege 15 secret strongpassw0rd",
+"verification": ["show ip route", "ping 10.10.20.2 from router to verify inter-vlan reachability"]
+"vlan 10",
+"vlan 10\\n name data",
+"vlan 10\n name data",
+"vlan 20",
+"vlan 20\\n name data"
+"vlan 20\n name voice",
+"vlan 30\n name iot",
+"vlan 30\n name mgmt"
+"vlan name status\n10 data active\n20 voice active",
+{"id": "phone", "label": "ip phone", "x": 260, "y": 260},

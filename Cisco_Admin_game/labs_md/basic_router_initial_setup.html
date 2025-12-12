@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Basic Router Initial Setup</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 { color: #1a5f7a; border-bottom: 2px solid #1a5f7a; padding-bottom: 10px; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    h3 { color: #34495e; margin-top: 20px; }
+    .difficulty {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .beginner { background: #d4edda; color: #155724; }
+    .mermaid {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .description {
+      background: #e8f4f8;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+      border-left: 4px solid #1a5f7a;
+    }
+    .step {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .step h3 {
+      margin-top: 0;
+      color: #1a5f7a;
+    }
+    .expected {
+      background: #f0f7f0;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .expected strong { color: #27ae60; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .simulated {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    ul { padding-left: 20px; }
+    li { margin: 8px 0; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.mermaid) {
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'default',
+          flowchart: { curve: 'basis', nodeSpacing: 50, rankSpacing: 50 }
+        });
+      }
+    });
+  </script>
+</head>
+<body>
+<h1>Basic Router Initial Setup</h1>
+<span class="difficulty beginner">Beginner Level</span>
+<div class="description"><strong>Goal:</strong> Configure a router from scratch: set hostname, secure console/VTY access with passwords, configure a login banner, and save the configuration.</div>
+<h2>Network Diagram</h2>
+<div class="mermaid">
+graph TD
+    Console["🖥️ Console PC"]
+    Router["📡 Router R1"]
+    Switch["🔀 Switch"]
+    Console -->|"Console Cable"| Router
+    Router --> Switch
+    subgraph Security["Security Configuration"]
+        A["hostname R1"]
+        B["enable secret"]
+        C["line console 0"]
+        D["line vty 0 4"]
+        E["banner motd"]
+    end
+</div>
+<h2>Lab Steps</h2>
+<div class="step">
+<h3>Step 1: Set hostname</h3>
+<p>Enter global configuration mode and set the router hostname to 'R1'.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>enable</code></li>
+<li><code>configure terminal</code></li>
+<li><code>hostname R1</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 2: Secure privileged EXEC mode</h3>
+<p>Set an encrypted enable secret password 'cisco123'.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>enable secret cisco123</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 3: Secure console access</h3>
+<p>Configure the console line with password 'console123' and require login.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>line console 0</code></li>
+<li><code>password console123</code></li>
+<li><code>login</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 4: Secure VTY (Telnet/SSH) access</h3>
+<p>Configure VTY lines 0-4 with password 'vty123' and require login.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>line vty 0 4</code></li>
+<li><code>password vty123</code></li>
+<li><code>login</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 5: Configure login banner</h3>
+<p>Set a message-of-the-day banner warning unauthorized users.</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>banner motd #Authorized Access Only#</code></li>
+<li><code>banner motd # Authorized Access Only #</code></li>
+</ul>
+</div>
+</div>
+<div class="step">
+<h3>Step 6: Save configuration</h3>
+<p>Save the running configuration to startup-config (NVRAM).</p>
+<div class="expected">
+<strong>Expected Commands:</strong>
+<ul>
+<li><code>copy running-config startup-config</code></li>
+<li><code>write memory</code></li>
+<li><code>wr</code></li>
+</ul>
+</div>
+</div>
+<h2>Simulated Outputs</h2>
+<div class="simulated">
+<ul>
+<li><code>show running-config | include hostname</code> &rarr; <code>hostname R1</code></li>
+<li><code>show running-config | include enable secret</code> &rarr; <code>enable secret 5 $1$...</code></li>
+<li><code>show startup-config</code> &rarr; <code>[Configuration saved]</code></li>
+</ul>
+</div>
+</body>
+</html>
