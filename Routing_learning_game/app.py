@@ -107,6 +107,7 @@ DIFFICULTIES = ["easy", "medium", "hard"]
 QUESTIONS_BY_DIFF = {d: [q for q in QUESTIONS if q.get("difficulty") == d] for d in DIFFICULTIES}
 
 SCORES_FILE = os.path.join(BASE_DIR, "scores.json")
+REVIEW_FILE = os.path.join(BASE_DIR, "review_list.json")
 
 
 def load_scores():
@@ -126,6 +127,44 @@ def save_score_record(record):
     try:
         with open(SCORES_FILE, "w", encoding="utf-8") as sf:
             json.dump(scores, sf, indent=2)
+    except Exception:
+        pass
+
+
+def load_review_list():
+    try:
+        if os.path.exists(REVIEW_FILE):
+            with open(REVIEW_FILE, 'r', encoding='utf-8') as rf:
+                return json.load(rf)
+    except Exception:
+        pass
+    return []
+
+
+def save_review_list(lst):
+    try:
+        with open(REVIEW_FILE, 'w', encoding='utf-8') as rf:
+            json.dump(lst, rf, indent=2)
+    except Exception:
+        pass
+
+
+def add_question_to_review(q):
+    # store minimal identifying info so questions can be matched later
+    try:
+        lst = load_review_list()
+        key = {'difficulty': q.get('difficulty'), 'question': q.get('question')}
+        if key not in lst:
+            lst.append(key)
+            save_review_list(lst)
+    except Exception:
+        pass
+
+
+def clear_review_list():
+    try:
+        if os.path.exists(REVIEW_FILE):
+            os.remove(REVIEW_FILE)
     except Exception:
         pass
 
@@ -241,8 +280,13 @@ class RoutingLearnApp(tk.Tk):
         diff_menu.pack(side=tk.LEFT)
 
         self.start_btn = ttk.Button(top_frame, text="Start Quiz", command=self.start_quiz)
-        self.start_btn.pack(side=tk.LEFT, padx=12)
+        self.start_btn.pack(side=tk.LEFT, padx=8)
 
+        self.review_btn = ttk.Button(top_frame, text="Start Review", command=self.start_review)
+        self.review_btn.pack(side=tk.LEFT, padx=4)
+
+        self.clear_review_btn = ttk.Button(top_frame, text="Clear Review", command=self._clear_review_prompt)
+        self.clear_review_btn.pack(side=tk.LEFT, padx=4)
         self.sound_var = tk.BooleanVar(value=settings.get("sound_enabled", True))
         self.sound_btn = ttk.Checkbutton(top_frame, text="Sound", variable=self.sound_var, command=self._toggle_sound)
         self.sound_btn.pack(side=tk.LEFT, padx=6)
@@ -253,7 +297,7 @@ class RoutingLearnApp(tk.Tk):
 
         self.progressbar = ttk.Progressbar(top_frame, length=200, maximum=15)
         self.progressbar.pack(side=tk.RIGHT, padx=6)
-        self.qcount_var = tk.StringVar(value="0/15")
+        self.qcount_var = tk.StringVar(value="0/0")
         ttk.Label(top_frame, textvariable=self.qcount_var).pack(side=tk.RIGHT)
 
         self.q_frame = ttk.Frame(self.quiz_frame)
@@ -364,7 +408,11 @@ class RoutingLearnApp(tk.Tk):
             self.choice_buttons[i].state(["!disabled"])
         self.feedback_var.set("")
         self.next_btn.state(["disabled"])
-        self.progress_var.set(f"{self.current_index + 1}/15")
+        self.progress_var.set(f"{self.current_index + 1}/{len(self.current_questions)}")
+        try:
+            self.qcount_var.set(f"{self.current_index + 1}/{len(self.current_questions)}")
+        except Exception:
+            pass
         try:
             self.anim_canvas.delete('all')
         except Exception:
@@ -401,6 +449,10 @@ class RoutingLearnApp(tk.Tk):
                 self._animate_confetti()
             except Exception:
                 pass
+            try:
+                add_question_to_review(q)
+            except Exception:
+                pass
         try:
             explanation = q.get('explanation', '')
             if explanation:
@@ -424,10 +476,38 @@ class RoutingLearnApp(tk.Tk):
         for btn in self.choice_buttons:
             btn.state(["disabled"])
         self.progressbar['value'] = 0
-        self.qcount_var.set("0/15")
-        self.feedback_var.set("")
+        self.progressbar['maximum'] = len(self.current_questions)
+        self.progressbar['value'] = 1
+        self.qcount_var.set(f"1/{len(self.current_questions)}")
 
+    def start_review(self):
+        # load review list and map to actual question objects
+        entries = load_review_list()
+        if not entries:
+            messagebox.showinfo("Review list empty", "No questions in the review list. Answer some questions incorrectly to add them.")
+            return
+        objs = []
+        for ent in entries:
+            # find matching question
+            matches = [q for q in QUESTIONS if q.get('difficulty') == ent.get('difficulty') and q.get('question') == ent.get('question')]
+            if matches:
+                objs.append(matches[0])
+        if not objs:
+            messagebox.showinfo("No matches", "No matching questions found for the saved review list.")
+            return
+        self.current_questions = objs
+        self.current_index = 0
+        self.score = 0
+        self.score_var.set(self.score)
+        self.progressbar['maximum'] = len(self.current_questions)
+        self._show_question()
+        self.progressbar['value'] = 1
+        self.qcount_var.set(f"1/{len(self.current_questions)}")
     def next_question(self):
+    def _clear_review_prompt(self):
+        if messagebox.askyesno("Clear Review List", "Clear all saved review questions?"):
+            clear_review_list()
+            messagebox.showinfo("Cleared", "Review list cleared.")
         self.current_index += 1
         if self.current_index >= len(self.current_questions):
             messagebox.showinfo("Quiz finished", f"Final score: {self.score}")

@@ -1,0 +1,5 @@
+[
+  {"id":"q1","type":"mcq","prompt":"Which connector is commonly used for SATA storage devices?","choices":["RJ45","SATA","HDMI","VGA"],"answer":1,"difficulty":"easy"},
+  {"id":"q2","type":"mcq","prompt":"Which component houses the CPU socket and RAM slots?","choices":["Power supply","Motherboard","Switch","SSD"],"answer":1,"difficulty":"easy"},
+  {"id":"q3","type":"wiring","prompt":"Connect the router WAN to the switch uplink (drag the cable).","task":"connect","pairs":[{"from":"router.wan","to":"switch.sw_port1"}],"difficulty":"medium"}
+]

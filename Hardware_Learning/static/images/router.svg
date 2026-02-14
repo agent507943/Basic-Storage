@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="280" viewBox="0 0 500 280">
+  <defs>
+    <linearGradient id="rtr-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e8f0f8"/>
+      <stop offset="100%" stop-color="#d0dce8"/>
+    </linearGradient>
+    <filter id="rtr-glow"><feGaussianBlur stdDeviation="1.5" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <text x="250" y="14" font-size="14" fill="#88aacc" text-anchor="middle" font-weight="bold">Wireless Router — Dual-Band AC/AX</text>
+
+  <!-- Router body -->
+  <rect x="30" y="50" width="440" height="180" fill="url(#rtr-grad)" stroke="#99aabb" stroke-width="2" rx="12"/>
+  <rect x="36" y="56" width="428" height="168" fill="none" stroke="#bcc8d4" stroke-width="0.5" rx="10"/>
+
+  <!-- Antennas -->
+  <g transform="translate(80,10)">
+    <rect x="0" y="0" width="6" height="50" fill="#888" stroke="#aaa" rx="3"/>
+    <circle cx="3" cy="-2" r="5" fill="#999" stroke="#bbb"/>
+    <text x="-8" y="60" font-size="7" fill="#888">2.4GHz</text>
+  </g>
+  <g transform="translate(210,10)">
+    <rect x="0" y="0" width="6" height="50" fill="#888" stroke="#aaa" rx="3"/>
+    <circle cx="3" cy="-2" r="5" fill="#999" stroke="#bbb"/>
+    <text x="-4" y="60" font-size="7" fill="#888">5GHz</text>
+  </g>
+  <g transform="translate(340,10)">
+    <rect x="0" y="0" width="6" height="50" fill="#888" stroke="#aaa" rx="3"/>
+    <circle cx="3" cy="-2" r="5" fill="#999" stroke="#bbb"/>
+    <text x="-8" y="60" font-size="7" fill="#888">2.4GHz</text>
+  </g>
+
+  <!-- Status LEDs row -->
+  <g transform="translate(60,70)">
+    <text x="0" y="-4" font-size="10" fill="#667788" font-weight="bold">Status Indicators</text>
+    <circle cx="10" cy="14" r="5" fill="#00dd66" filter="url(#rtr-glow)"/>
+    <text x="0" y="30" font-size="8" fill="#558866">Power</text>
+    <circle cx="50" cy="14" r="5" fill="#00dd66" filter="url(#rtr-glow)"/>
+    <text x="38" y="30" font-size="8" fill="#558866">Internet</text>
+    <circle cx="100" cy="14" r="5" fill="#ffaa00" filter="url(#rtr-glow)"/>
+    <text x="88" y="30" font-size="8" fill="#aa8844">WiFi 2.4</text>
+    <circle cx="150" cy="14" r="5" fill="#00aaff" filter="url(#rtr-glow)"/>
+    <text x="138" y="30" font-size="8" fill="#2288aa">WiFi 5</text>
+    <circle cx="200" cy="14" r="5" fill="#00dd66" filter="url(#rtr-glow)" opacity="0.5"/>
+    <text x="188" y="30" font-size="8" fill="#558866">LAN</text>
+    <circle cx="250" cy="14" r="5" fill="#ff6600" filter="url(#rtr-glow)" opacity="0.4"/>
+    <text x="242" y="30" font-size="8" fill="#aa6622">WPS</text>
+    <circle cx="300" cy="14" r="5" fill="#444"/>
+    <text x="290" y="30" font-size="8" fill="#666">USB</text>
+  </g>
+
+  <!-- WAN Port -->
+  <g transform="translate(60,120)">
+    <text x="0" y="-6" font-size="11" fill="#ffcc00" font-weight="bold">WAN Port (Internet)</text>
+    <rect x="0" y="0" width="48" height="36" fill="#111" stroke="#ffcc00" stroke-width="2.5" rx="3"/>
+    <rect x="6" y="6" width="36" height="24" fill="#0d0d0d" rx="1"/>
+    <text x="12" y="22" font-size="10" fill="#ffcc00" font-weight="bold">WAN</text>
+    <circle cx="10" cy="40" r="3" fill="#00ff66" filter="url(#rtr-glow)"/>
+    <circle cx="38" cy="40" r="3" fill="#ffaa00" filter="url(#rtr-glow)"/>
+    <text x="0" y="54" font-size="8" fill="#ffcc00">Link  Activity</text>
+    <text x="0" y="66" font-size="8" fill="#666">Connects to ISP modem</text>
+    <text x="0" y="78" font-size="8" fill="#666">(RJ45 — Cat5e/Cat6)</text>
+    <circle class="conn" cx="24" cy="18" r="5" fill="#f39c12" data-conn="router.wan"/>
+  </g>
+
+  <!-- LAN Ports -->
+  <g transform="translate(150,120)">
+    <text x="0" y="-6" font-size="11" fill="#2288cc" font-weight="bold">LAN Ports (1 Gbps)</text>
+    <rect x="0" y="0" width="48" height="36" fill="#111" stroke="#2288cc" stroke-width="2" rx="3"/>
+    <rect x="6" y="6" width="36" height="24" fill="#0d0d0d" rx="1"/>
+    <text x="10" y="22" font-size="9" fill="#66aadd" font-weight="bold">LAN1</text>
+    <circle cx="10" cy="40" r="3" fill="#00ff66" filter="url(#rtr-glow)"/>
+    <circle class="conn" cx="24" cy="18" r="5" fill="#0b74de" data-conn="router.lan1"/>
+
+    <rect x="56" y="0" width="48" height="36" fill="#111" stroke="#2288cc" stroke-width="2" rx="3"/>
+    <rect x="62" y="6" width="36" height="24" fill="#0d0d0d" rx="1"/>
+    <text x="66" y="22" font-size="9" fill="#66aadd">LAN2</text>
+
+    <rect x="112" y="0" width="48" height="36" fill="#111" stroke="#2288cc" stroke-width="2" rx="3"/>
+    <rect x="118" y="6" width="36" height="24" fill="#0d0d0d" rx="1"/>
+    <text x="122" y="22" font-size="9" fill="#66aadd">LAN3</text>
+
+    <rect x="168" y="0" width="48" height="36" fill="#111" stroke="#2288cc" stroke-width="2" rx="3"/>
+    <rect x="174" y="6" width="36" height="24" fill="#0d0d0d" rx="1"/>
+    <text x="178" y="22" font-size="9" fill="#66aadd">LAN4</text>
+
+    <text x="0" y="54" font-size="8" fill="#2288cc">Gigabit Ethernet — for PCs, switches, APs</text>
+    <text x="0" y="66" font-size="8" fill="#666">Use Cat5e or Cat6 cables</text>
+  </g>
+
+  <!-- USB Port -->
+  <g transform="translate(380,120)">
+    <text x="0" y="-6" font-size="10" fill="#4488ff" font-weight="bold">USB 3.0</text>
+    <rect x="0" y="0" width="34" height="22" fill="#111" stroke="#4488ff" stroke-width="1.5" rx="2"/>
+    <rect x="4" y="4" width="10" height="14" fill="#3377dd" rx="1" opacity="0.3"/>
+    <text x="0" y="34" font-size="8" fill="#666">For NAS / printer</text>
+    <text x="0" y="44" font-size="8" fill="#666">sharing</text>
+  </g>
+
+  <!-- Reset & WPS buttons -->
+  <g transform="translate(380,175)">
+    <circle cx="10" cy="10" r="4" fill="#888" stroke="#aaa"/>
+    <text x="0" y="26" font-size="8" fill="#888">Reset</text>
+    <text x="0" y="36" font-size="7" fill="#666">(Hold 10s for</text>
+    <text x="0" y="45" font-size="7" fill="#666">factory reset)</text>
+    <rect x="50" y="2" width="24" height="16" fill="#ddd" stroke="#aaa" rx="3"/>
+    <text x="54" y="14" font-size="8" fill="#667">WPS</text>
+    <text x="50" y="30" font-size="7" fill="#666">Quick WiFi</text>
+    <text x="50" y="39" font-size="7" fill="#666">pairing</text>
+  </g>
+
+  <!-- Power connector -->
+  <g transform="translate(440,120)">
+    <text x="0" y="-6" font-size="10" fill="#888">Power</text>
+    <circle cx="12" cy="12" r="8" fill="#111" stroke="#666" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="3" fill="#333"/>
+    <text x="0" y="32" font-size="7" fill="#666">DC 12V 2A</text>
+  </g>
+
+  <!-- Brand plate -->
+  <rect x="170" y="210" width="160" height="24" fill="#ccd4dd" rx="6"/>
+  <text x="250" y="226" font-size="11" fill="#556677" text-anchor="middle" font-weight="bold">Wireless Router</text>
+
+  <!-- Info -->
+  <text x="250" y="256" font-size="9" fill="#667" text-anchor="middle">Yellow WAN port connects to ISP | Blue LAN ports connect to local devices</text>
+  <text x="250" y="270" font-size="9" fill="#556" text-anchor="middle">Default gateway usually: 192.168.1.1 or 192.168.0.1</text>
+</svg>

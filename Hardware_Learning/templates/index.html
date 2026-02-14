@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Hardware Learning</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+  </head>
+  <body>
+    <header>
+      <h1>Hardware Learning — Desktops, Servers, Routers & Switches</h1>
+      <div class="controls">
+        <button id="start-quiz">Start Quiz</button>
+        <button id="show-study">Study Guide</button>
+        <span id="review-count">Review: {{ review_count }}</span>
+      </div>
+    </header>
+
+    <main>
+      <section id="canvas">
+        <!-- Inline SVG diagram; hotspots will be rendered from components.json -->
+        <svg id="diagram" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg">
+          <g id="viewport">
+          <!-- All content rendered dynamically by app.js renderHotspots() -->
+          </g>
+        </svg>
+      </section>
+
+      <aside id="info">
+        <div id="panel">
+          <h2 id="comp-name">Click a component</h2>
+          <div id="comp-image" style="display:none;max-width:100%;margin:8px 0;border:1px solid #ddd;padding:4px;min-height:48px"></div>
+          <p id="comp-desc">Select a hotspot on the diagram to see details about the hardware location and function.</p>
+        </div>
+        <div id="quiz" class="hidden">
+          <h3 id="quiz-prompt">Quiz</h3>
+          <p id="quiz-target"></p>
+          <div id="mcq-choices"></div>
+          <div id="wiring-board" style="display:none;margin-top:8px;">
+            <p id="wiring-instructions">Drag from a connector to the matching connector.</p>
+            <svg id="wiring-svg" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:200px;border:1px solid #ddd;background:#fff"></svg>
+          </div>
+          <p id="quiz-feedback"></p>
+          <button id="add-review">Add to Review</button>
+          <button id="end-quiz">End Quiz</button>
+        </div>
+      </aside>
+
+      <section id="study" class="hidden">
+        <h2>Study Guide</h2>
+        <pre>{{ study }}</pre>
+      </section>
+
+      <section id="editor" class="hidden">
+        <h2>Diagram Editor</h2>
+        <p>Select a component to adjust connector points or upload a replacement image.</p>
+        <label for="component-select">Component</label>
+        <select id="component-select"></select>
+        <div id="editor-canvas" style="border:1px solid #ccc;margin-top:8px;padding:6px;min-height:180px"></div>
+        <div style="margin-top:8px">
+          <label>Upload image (SVG or JPG/PNG):</label>
+          <input type="file" id="upload-file" />
+          <button id="upload-btn">Upload</button>
+          <button id="save-connectors">Save Connectors</button>
+          <button id="refresh-coords">Refresh Coords From SVGs</button>
+        </div>
+        <div id="editor-msg" style="margin-top:8px;color:#333"></div>
+      </section>
+    </main>
+
+    <div id="tooltip" style="position:fixed;pointer-events:none;display:none;padding:6px;background:rgba(0,0,0,0.8);color:white;border-radius:4px;font-size:13px;z-index:9999"></div>
+    <script>const COMPONENTS = {{ components|tojson }};</script>
+    <script>const QUESTIONS = {{ questions|tojson }};</script>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

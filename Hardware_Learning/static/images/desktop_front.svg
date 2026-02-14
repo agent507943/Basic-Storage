@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="420" viewBox="0 0 280 420">
+  <defs>
+    <linearGradient id="case-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a4a4a"/>
+      <stop offset="100%" stop-color="#2a2a2a"/>
+    </linearGradient>
+    <filter id="led-glow"><feGaussianBlur stdDeviation="2" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <!-- Case body -->
+  <rect x="10" y="10" width="260" height="400" fill="url(#case-grad)" stroke="#666" stroke-width="2" rx="6"/>
+  <rect x="16" y="16" width="248" height="388" fill="none" stroke="#555" stroke-width="0.5" rx="4"/>
+  <text x="140" y="8" font-size="13" fill="#88aacc" text-anchor="middle" font-weight="bold">Desktop Tower — Front Panel</text>
+
+  <!-- 5.25" Optical Drive Bay -->
+  <rect x="24" y="24" width="232" height="40" fill="#1e1e1e" stroke="#555" rx="2"/>
+  <rect x="230" y="30" width="18" height="28" fill="#333" stroke="#555" rx="2"/>
+  <text x="32" y="50" font-size="11" fill="#aaa">5.25" Optical Drive Bay</text>
+  <text x="32" y="60" font-size="9" fill="#666">(DVD / Blu-ray)</text>
+  <circle cx="40" cy="38" r="3" fill="#00dd66" filter="url(#led-glow)" opacity="0.6"/>
+
+  <!-- 3.5" Drive Bays -->
+  <g transform="translate(24,74)">
+    <text x="0" y="-4" font-size="10" fill="#88aacc" font-weight="bold">3.5" Drive Bays (HDD/SSD)</text>
+    <rect x="0" y="0" width="232" height="28" fill="#1a1a1a" stroke="#404040" rx="2"/>
+    <circle cx="12" cy="14" r="4" fill="#33ff88" filter="url(#led-glow)"/>
+    <text x="22" y="18" font-size="10" fill="#888">HDD 1 — Activity LED</text>
+    <rect x="0" y="34" width="232" height="28" fill="#1a1a1a" stroke="#404040" rx="2"/>
+    <circle cx="12" cy="48" r="4" fill="#555"/>
+    <text x="22" y="52" font-size="10" fill="#888">HDD 2 — Empty</text>
+    <rect x="0" y="68" width="232" height="28" fill="#1a1a1a" stroke="#404040" rx="2"/>
+    <circle cx="12" cy="82" r="4" fill="#555"/>
+    <text x="22" y="86" font-size="10" fill="#888">HDD 3 — Empty</text>
+  </g>
+
+  <!-- Power Button Area -->
+  <g transform="translate(100,190)">
+    <text x="40" y="-8" font-size="11" fill="#88aacc" text-anchor="middle" font-weight="bold">Power</text>
+    <circle cx="40" cy="18" r="18" fill="#333" stroke="#666" stroke-width="2"/>
+    <circle cx="40" cy="18" r="8" fill="#00dd66" filter="url(#led-glow)"/>
+    <!-- Power symbol -->
+    <line x1="40" y1="6" x2="40" y2="12" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M 33 10 A 10 10 0 1 0 47 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- USB 3.0 Ports -->
+  <g id="front-usb" transform="translate(24,240)">
+    <text x="0" y="-4" font-size="11" fill="#4488ff" font-weight="bold">USB 3.0 Ports</text>
+    <rect x="0" y="0" width="48" height="20" fill="#0a0a0a" stroke="#3377dd" stroke-width="2" rx="3"/>
+    <rect x="4" y="4" width="16" height="12" fill="#0d0d0d" rx="1"/>
+    <rect x="28" y="4" width="16" height="12" fill="#3377dd" rx="1" opacity="0.3"/>
+    <text x="10" y="30" font-size="8" fill="#4488ff">Type-A</text>
+    <circle class="conn" cx="24" cy="10" r="4" fill="#0b74de" data-conn="desktop_front.front_usb1"/>
+
+    <rect x="60" y="0" width="48" height="20" fill="#0a0a0a" stroke="#3377dd" stroke-width="2" rx="3"/>
+    <rect x="64" y="4" width="16" height="12" fill="#0d0d0d" rx="1"/>
+    <rect x="88" y="4" width="16" height="12" fill="#3377dd" rx="1" opacity="0.3"/>
+    <text x="70" y="30" font-size="8" fill="#4488ff">Type-A</text>
+    <circle class="conn" cx="84" cy="10" r="4" fill="#0b74de" data-conn="desktop_front.front_usb2"/>
+
+    <text x="120" y="14" font-size="9" fill="#666">SuperSpeed 5 Gbps</text>
+  </g>
+
+  <!-- Audio Jacks -->
+  <g id="front-audio" transform="translate(24,290)">
+    <text x="0" y="-4" font-size="11" fill="#88cc88" font-weight="bold">Audio Jacks</text>
+    <circle cx="16" cy="16" r="10" fill="#0a0a0a" stroke="#55cc55" stroke-width="2"/>
+    <circle cx="16" cy="16" r="4" fill="#222"/>
+    <text x="4" y="38" font-size="9" fill="#55cc55">Headphone</text>
+    <text x="4" y="48" font-size="8" fill="#666">(Line Out)</text>
+    <circle class="conn" cx="16" cy="16" r="4" fill="#6ab04c" data-conn="desktop_front.front_audio"/>
+
+    <circle cx="60" cy="16" r="10" fill="#0a0a0a" stroke="#ff5577" stroke-width="2"/>
+    <circle cx="60" cy="16" r="4" fill="#222"/>
+    <text x="48" y="38" font-size="9" fill="#ff5577">Microphone</text>
+    <text x="48" y="48" font-size="8" fill="#666">(Line In)</text>
+
+    <text x="100" y="16" font-size="9" fill="#666">3.5mm TRS</text>
+  </g>
+
+  <!-- Ventilation Mesh -->
+  <g transform="translate(24,355)">
+    <text x="0" y="-4" font-size="10" fill="#888">Ventilation / Air Intake</text>
+    <rect x="0" y="0" width="232" height="48" fill="#1a1a1a" stroke="#333" rx="2"/>
+    <line x1="8" y1="6" x2="224" y2="6" stroke="#333" stroke-width="0.8"/>
+    <line x1="8" y1="12" x2="224" y2="12" stroke="#333" stroke-width="0.8"/>
+    <line x1="8" y1="18" x2="224" y2="18" stroke="#333" stroke-width="0.8"/>
+    <line x1="8" y1="24" x2="224" y2="24" stroke="#333" stroke-width="0.8"/>
+    <line x1="8" y1="30" x2="224" y2="30" stroke="#333" stroke-width="0.8"/>
+    <line x1="8" y1="36" x2="224" y2="36" stroke="#333" stroke-width="0.8"/>
+    <line x1="8" y1="42" x2="224" y2="42" stroke="#333" stroke-width="0.8"/>
+    <text x="116" y="52" font-size="8" fill="#555" text-anchor="middle">Dust filter recommended</text>
+  </g>
+</svg>

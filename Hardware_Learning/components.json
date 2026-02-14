@@ -1,0 +1,157 @@
+[
+  {
+    "id": "desktop_front",
+    "name": "Desktop Front Panel",
+    "category": "Desktop",
+    "desc": "Power button, USB ports, audio jacks; front panel connectors.",
+    "image": "desktop_front.svg",
+    "svg": {
+      "type": "rect",
+      "x": 15,
+      "y": 20,
+      "w": 140,
+      "h": 195
+    },
+    "connectors": [
+      {
+        "id": "front_usb1",
+        "x": 39.0,
+        "y": 136.1
+      },
+      {
+        "id": "front_usb2",
+        "x": 69.0,
+        "y": 136.1
+      },
+      {
+        "id": "front_audio",
+        "x": 35.0,
+        "y": 162.1
+      }
+    ]
+  },
+  {
+    "id": "desktop_motherboard",
+    "name": "Motherboard",
+    "category": "Desktop",
+    "desc": "Main PCB containing CPU socket, RAM slots, chipset, and connectors.",
+    "image": "motherboard.svg",
+    "svg": {
+      "type": "rect",
+      "x": 165,
+      "y": 20,
+      "w": 285,
+      "h": 200
+    },
+    "connectors": [
+      {
+        "id": "cpu_socket",
+        "x": 221.0,
+        "y": 56.4
+      },
+      {
+        "id": "ram_slot",
+        "x": 294.3,
+        "y": 60.9
+      },
+      {
+        "id": "sata0",
+        "x": 198.6,
+        "y": 111.8
+      }
+    ]
+  },
+  {
+    "id": "server_rack",
+    "name": "Server (rack unit)",
+    "category": "Server",
+    "desc": "Rack-mounted server with hot-swap drive bays, NICs, and power supplies.",
+    "image": "server_rack.svg",
+    "svg": {
+      "type": "rect",
+      "x": 460,
+      "y": 20,
+      "w": 245,
+      "h": 200
+    },
+    "connectors": [
+      {
+        "id": "drive_bay1",
+        "x": 497.3,
+        "y": 43.0
+      },
+      {
+        "id": "nic1",
+        "x": 495.7,
+        "y": 74.4
+      },
+      {
+        "id": "psu",
+        "x": 532.5,
+        "y": 133.7
+      }
+    ]
+  },
+  {
+    "id": "switch",
+    "name": "Network Switch",
+    "category": "Network",
+    "desc": "RJ45 ports where network cables are plugged in; grouped by VLAN/function.",
+    "image": "switch_front.svg",
+    "svg": {
+      "type": "rect",
+      "x": 15,
+      "y": 232,
+      "w": 435,
+      "h": 55
+    },
+    "connectors": [
+      {
+        "id": "sw_port1",
+        "x": 95.2,
+        "y": 244.7
+      },
+      {
+        "id": "sw_port2",
+        "x": 108.8,
+        "y": 244.7
+      },
+      {
+        "id": "sw_port3",
+        "x": 122.5,
+        "y": 244.7
+      },
+      {
+        "id": "sw_port4",
+        "x": 136.2,
+        "y": 244.7
+      }
+    ]
+  },
+  {
+    "id": "router",
+    "name": "Router",
+    "category": "Network",
+    "desc": "Wide Area Network uplink, connects to ISP/edge network. Includes WAN and LAN ports.",
+    "image": "router.svg",
+    "svg": {
+      "type": "rect",
+      "x": 460,
+      "y": 232,
+      "w": 245,
+      "h": 150
+    },
+    "connectors": [
+      {
+        "id": "wan",
+        "x": 607.8,
+        "y": 220.9
+      },
+      {
+        "id": "lan1",
+        "x": 611.4,
+        "y": 220.9
+      }
+    ]
+  }
+]

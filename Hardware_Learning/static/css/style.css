@@ -1,0 +1,52 @@
+body{font-family: 'Segoe UI', Arial, Helvetica, sans-serif; margin:0; background:#0d1117; color:#c9d1d9;}
+header{background:#161b22;color:#e6edf3;padding:14px;border-bottom:1px solid #30363d}
+header h1{margin:0;font-size:18px;color:#58a6ff}
+.controls{margin-top:8px}
+.controls button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:6px 14px;border-radius:6px;cursor:pointer;margin-right:6px;font-size:13px}
+.controls button:hover{background:#30363d;border-color:#58a6ff}
+.controls span{color:#8b949e;font-size:13px}
+main{display:flex;gap:12px;padding:12px}
+#canvas{flex:1}
+#info{width:340px}
+#info #panel{background:#161b22;padding:14px;border:1px solid #30363d;border-radius:8px;color:#c9d1d9}
+#info #panel h2{color:#58a6ff;margin-top:0;font-size:16px}
+#info #panel p{color:#8b949e;line-height:1.5}
+#study{position:fixed;right:12px;bottom:12px;width:380px;max-height:60vh;overflow:auto;background:#161b22;border:1px solid #30363d;padding:12px;border-radius:8px;color:#c9d1d9}
+.hidden{display:none}
+svg{width:100%;height:auto;border:1px solid #30363d;border-radius:6px;background:#0d1117}
+#quiz{margin-top:12px;background:#161b22;padding:10px;border:1px solid #30363d;border-radius:8px;color:#c9d1d9}
+#quiz h3{color:#58a6ff;margin-top:0}
+/* hotspot overlays — transparent by default, subtle glow on hover */
+.hot{fill:transparent;stroke:none;cursor:pointer;transition:fill 0.2s}
+.hot:hover{fill:rgba(88,166,255,0.08);stroke:rgba(88,166,255,0.3);stroke-width:1.5px}
+/* connector dots — cyan with pulse */
+.connector{fill:#00c8ff;stroke:#0099cc;stroke-width:1;opacity:0.85;cursor:pointer;transition:opacity 0.2s}
+.connector:hover{opacity:1;stroke:#fff;stroke-width:2}
+.w-connector{fill:#58a6ff;stroke:#1f6feb;stroke-width:1.5;cursor:pointer}
+.w-connector:hover{fill:#79c0ff;stroke:#fff}
+/* inline svg per-image connectors */
+.conn{cursor:pointer;opacity:0.95}
+.conn:hover{stroke:#fff;stroke-width:1.5}
+
+/* MCQ buttons */
+.mcq-btn{display:block;margin:6px 0;padding:10px;border-radius:6px;border:1px solid #30363d;background:#21262d;color:#c9d1d9;cursor:pointer;font-size:14px;transition:all 0.15s}
+.mcq-btn:hover{background:#30363d;border-color:#58a6ff;color:#fff}
+
+/* wiring svg lines */
+#line{stroke:#333}
+
+/* Button styles */
+button{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:6px 12px;border-radius:6px;cursor:pointer}
+button:hover{background:#30363d;border-color:#58a6ff}
+
+/* Editor section */
+#editor{background:#161b22;padding:12px;border:1px solid #30363d;border-radius:8px;color:#c9d1d9;margin-top:12px}
+#editor h2{color:#58a6ff}
+#editor label{color:#8b949e}
+#editor select{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:4px 8px;border-radius:4px}
+#editor input[type="file"]{color:#8b949e}
+
+/* comp-image inlined SVG */
+#comp-image{background:#0d1117;border-radius:6px}
+#comp-image svg{max-width:100%;height:auto}
+
