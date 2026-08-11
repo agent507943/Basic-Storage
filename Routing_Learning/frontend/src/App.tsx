@@ -45,6 +45,7 @@ type OSPFLsaRow = {
 const tabs: TabKey[] = ['Study', 'Quiz', 'Route Lab', 'OSPF Lab', 'History']
 const difficultyOptions = ['easy', 'medium', 'hard'] as const
 const questionCounts = [10, 15, 20, 25]
+const focusPills = ['Longest prefix match', 'AD + metric', 'OSPF areas', 'DR / BDR']
 
 const studyOverview = [
   {
