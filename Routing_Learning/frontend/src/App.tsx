@@ -46,6 +46,11 @@ const tabs: TabKey[] = ['Study', 'Quiz', 'Route Lab', 'OSPF Lab', 'History']
 const difficultyOptions = ['easy', 'medium', 'hard'] as const
 const questionCounts = [10, 15, 20, 25]
 const focusPills = ['Longest prefix match', 'AD + metric', 'OSPF areas', 'DR / BDR']
+const defaultSettings = {
+  soundEnabled: true,
+  showHintsByDefault: false,
+  compactMode: false,
+}
 
 const studyOverview = [
   {
@@ -254,6 +259,9 @@ function App() {
   const [statusMessage, setStatusMessage] = useState('Ready for a new routing round.')
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [reviewQueue, setReviewQueue] = useState<string[]>([])
+  const [settings, setSettings] = useState(defaultSettings)
+  const [answeredCount, setAnsweredCount] = useState(0)
+  const [wrongCount, setWrongCount] = useState(0)
   const [routeScenario, setRouteScenario] = useState<RouteScenarioKey>('LPM default test')
   const [routeDestination, setRouteDestination] = useState(routeLabScenarios['LPM default test'].destination)
   const [routeMatches, setRouteMatches] = useState<RouteEntry[]>([])
@@ -283,8 +291,29 @@ function App() {
     localStorage.setItem('routing-learning-review', JSON.stringify(reviewQueue))
   }, [reviewQueue])
 
+  useEffect(() => {
+    try {
+      const savedSettings = localStorage.getItem('routing-learning-settings')
+      if (savedSettings) {
+        setSettings({ ...defaultSettings, ...JSON.parse(savedSettings) })
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('routing-learning-settings', JSON.stringify(settings))
+  }, [settings])
+
   const totalQuestions = questions.length
   const currentProgress = totalQuestions ? Math.round(((currentIndex + 1) / totalQuestions) * 100) : 0
+  const accuracy = answeredCount ? Math.round((correctCount / answeredCount) * 100) : 0
+  const incorrectCount = questions.length ? Math.max(0, answeredCount - correctCount) : 0
+
+  const updateSetting = <K extends keyof typeof defaultSettings>(key: K, value: (typeof defaultSettings)[K]) => {
+    setSettings((previous) => ({ ...previous, [key]: value }))
+  }
 
   const metrics = useMemo(
     () => [
@@ -350,8 +379,10 @@ function App() {
     setCurrentIndex(0)
     setScore(0)
     setCorrectCount(0)
+    setAnsweredCount(0)
+    setWrongCount(0)
     setSelectedAnswer(null)
-    setShowHint(false)
+    setShowHint(settings.showHintsByDefault)
     setShowExplanation(false)
     setStatusMessage(`Quiz started: ${selected.length} ${difficulty} questions.`)
     setActiveTab('Quiz')
@@ -362,6 +393,7 @@ function App() {
 
     setSelectedAnswer(choice)
     setShowExplanation(true)
+    setAnsweredCount((previous) => previous + 1)
 
     if (choice === currentQuestion.answer) {
       setScore((previous) => previous + 10)
@@ -370,6 +402,7 @@ function App() {
       return
     }
 
+    setWrongCount((previous) => previous + 1)
     setScore((previous) => previous - 5)
     setReviewQueue((previous) => [...new Set([...previous, buildQuestionKey(currentQuestion)])])
     setStatusMessage(`Incorrect. Correct answer: ${currentQuestion.answer}`)
@@ -423,8 +456,10 @@ function App() {
     setCurrentIndex(0)
     setScore(0)
     setCorrectCount(0)
+    setAnsweredCount(0)
+    setWrongCount(0)
     setSelectedAnswer(null)
-    setShowHint(false)
+    setShowHint(settings.showHintsByDefault)
     setShowExplanation(false)
     setStatusMessage(`Review mode: ${reviewQuestions.length} missed questions.`)
     setActiveTab('Quiz')
@@ -433,6 +468,19 @@ function App() {
   const clearReview = () => {
     setReviewQueue([])
     setStatusMessage('Review queue cleared.')
+  }
+
+  const restartSameQuiz = () => {
+    if (!questions.length) return
+    setCurrentIndex(0)
+    setScore(0)
+    setCorrectCount(0)
+    setAnsweredCount(0)
+    setWrongCount(0)
+    setSelectedAnswer(null)
+    setShowHint(settings.showHintsByDefault)
+    setShowExplanation(false)
+    setStatusMessage(`Re-started the current ${difficulty} round.`)
   }
 
   return (
@@ -481,9 +529,29 @@ function App() {
               ))}
             </div>
           </div>
-          <button type="button" className="primary-button" onClick={startQuiz}>
-            Start Quiz
-          </button>
+          <div className="topbar-actions">
+            <div className="settings-stack">
+              <label className="toggle-row">
+                <input
+                  type="checkbox"
+                  checked={settings.soundEnabled}
+                  onChange={(event) => updateSetting('soundEnabled', event.target.checked)}
+                />
+                Sound
+              </label>
+              <label className="toggle-row">
+                <input
+                  type="checkbox"
+                  checked={settings.showHintsByDefault}
+                  onChange={(event) => updateSetting('showHintsByDefault', event.target.checked)}
+                />
+                Show hints
+              </label>
+            </div>
+            <button type="button" className="primary-button" onClick={startQuiz}>
+              Start Quiz
+            </button>
+          </div>
         </header>
 
         <section className="stats-grid" aria-label="Project metrics">
@@ -643,10 +711,10 @@ function App() {
                 <span className="tag success">{score >= 0 ? '+' : ''}{score}</span>
               </div>
 
-              <div className="score-ring" style={{ background: `conic-gradient(#38bdf8 0 ${Math.min(100, Math.max(0, 100 * (correctCount / Math.max(questions.length || 1, 1))))}%, rgba(148, 163, 184, 0.2) ${Math.min(100, Math.max(0, 100 * (correctCount / Math.max(questions.length || 1, 1))))}% 100%)` }}>
+              <div className="score-ring" style={{ background: `conic-gradient(#38bdf8 0 ${Math.min(100, Math.max(0, accuracy))}%, rgba(148, 163, 184, 0.2) ${Math.min(100, Math.max(0, accuracy))}% 100%)` }}>
                 <div className="score-inner">
-                  <strong>{questions.length ? Math.round((correctCount / questions.length) * 100) : 0}%</strong>
-                  <span>score</span>
+                  <strong>{accuracy}%</strong>
+                  <span>accuracy</span>
                 </div>
               </div>
 
@@ -657,13 +725,23 @@ function App() {
                 </li>
                 <li>
                   <span>Incorrect</span>
-                  <strong>{questions.length ? Math.max(0, currentIndex + 1 - correctCount) : 0}</strong>
+                  <strong>{wrongCount || incorrectCount}</strong>
+                </li>
+                <li>
+                  <span>Answered</span>
+                  <strong>{answeredCount}</strong>
                 </li>
                 <li>
                   <span>Review queue</span>
                   <strong>{reviewQueue.length}</strong>
                 </li>
               </ul>
+
+              <div className="mini-actions">
+                <button type="button" className="secondary-button" onClick={restartSameQuiz} disabled={!questions.length}>
+                  Restart round
+                </button>
+              </div>
             </aside>
           </section>
         )}
@@ -696,6 +774,12 @@ function App() {
               <button type="button" className="primary-button small" onClick={analyzeRouteLab}>
                 Analyze Route
               </button>
+            </div>
+
+            <div className="rule-badges">
+              <span className="pill neutral">Longest prefix match</span>
+              <span className="pill neutral">Lower AD wins</span>
+              <span className="pill neutral">Then lower metric</span>
             </div>
 
             <div className="route-topology">
@@ -788,6 +872,12 @@ function App() {
                   ))}
                 </select>
               </label>
+            </div>
+
+            <div className="rule-badges">
+              <span className="pill neutral">Area 0 backbone</span>
+              <span className="pill neutral">ABR summarization</span>
+              <span className="pill neutral">DR / BDR election</span>
             </div>
 
             <div className="ospf-layout">
