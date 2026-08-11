@@ -1,0 +1,10 @@
+[
+  {
+    "difficulty": "easy",
+    "question": "What is the main advantage of dynamic routing over static routing?"
+  },
+  {
+    "difficulty": "easy",
+    "question": "What is the maximum hop count for RIP?"
+  }
+]
