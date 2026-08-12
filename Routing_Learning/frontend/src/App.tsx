@@ -86,6 +86,113 @@ const routeNodes = [
 
 const routeNodeMap = Object.fromEntries(routeNodes.map((node) => [node.id, node])) as Record<string, (typeof routeNodes)[number]>
 
+type DeviceType = 'router' | 'switch'
+
+type DeviceDetails = {
+  type: DeviceType
+  role: string
+  ip: string
+  interfaces: string[]
+  neighbors: string[]
+  note: string
+}
+
+const topologyDevices: Record<string, DeviceDetails> = {
+  Edge: {
+    type: 'router',
+    role: 'Edge router',
+    ip: '192.168.1.1/24',
+    interfaces: ['Gi0/0', 'Gi0/1', 'Gi0/2'],
+    neighbors: ['R1', 'R2', 'R3'],
+    note: 'Policy and default route selection begin at the edge.',
+  },
+  R1: {
+    type: 'router',
+    role: 'Distribution router',
+    ip: '10.10.1.1/25',
+    interfaces: ['Gi0/0', 'Gi0/1'],
+    neighbors: ['Edge', 'LAN-A'],
+    note: 'Advertises the most specific subnet toward the LAN.',
+  },
+  R2: {
+    type: 'router',
+    role: 'Core transit router',
+    ip: '10.10.1.2/24',
+    interfaces: ['Gi0/0', 'Gi0/1'],
+    neighbors: ['Edge', 'LAN-B'],
+    note: 'OSPF routes are evaluated after longest-prefix matching.',
+  },
+  R3: {
+    type: 'router',
+    role: 'Backup transit router',
+    ip: '10.10.1.3/24',
+    interfaces: ['Gi0/0', 'Gi0/1'],
+    neighbors: ['Edge', 'LAN-C'],
+    note: 'Admin distance and metric become more important when prefixes tie.',
+  },
+  'LAN-A': {
+    type: 'switch',
+    role: 'Access switch',
+    ip: '10.10.1.130/25',
+    interfaces: ['VLAN 10', 'Gi1/0/1', 'Gi1/0/2'],
+    neighbors: ['R1'],
+    note: 'Hosts on this VLAN connect to the edge through the most specific network.',
+  },
+  'LAN-B': {
+    type: 'switch',
+    role: 'Access switch',
+    ip: '10.10.1.131/24',
+    interfaces: ['VLAN 20', 'Gi1/0/3'],
+    neighbors: ['R2'],
+    note: 'The switch carries the OSPF-learned path into the local subnet.',
+  },
+  'LAN-C': {
+    type: 'switch',
+    role: 'Access switch',
+    ip: '10.10.1.132/24',
+    interfaces: ['VLAN 30', 'Gi1/0/4'],
+    neighbors: ['R3'],
+    note: 'This path is lower priority unless the more specific route is absent.',
+  },
+  ISP: {
+    type: 'router',
+    role: 'Provider edge',
+    ip: '203.0.113.1/30',
+    interfaces: ['Gi0/0', 'Gi0/1'],
+    neighbors: ['Edge', 'Internet'],
+    note: 'Preferred exit to the public network when the route is valid.',
+  },
+  'Backup ISP': {
+    type: 'router',
+    role: 'Redundant exit',
+    ip: '198.51.100.1/30',
+    interfaces: ['Gi0/0', 'Gi0/1'],
+    neighbors: ['Edge', 'Internet'],
+    note: 'Used as a default path when the primary path is unavailable.',
+  },
+  Internet: {
+    type: 'router',
+    role: 'Internet core',
+    ip: '8.8.8.8/32',
+    interfaces: ['Lo0', 'Te0/0'],
+    neighbors: ['ISP', 'Backup ISP'],
+    note: 'The destination network is outside the local enterprise topology.',
+  },
+}
+
+const topologyInterfaceState: Record<string, Record<string, 'up' | 'down' | 'admin-down'>> = {
+  Edge: { 'Gi0/0': 'up', 'Gi0/1': 'up', 'Gi0/2': 'admin-down' },
+  R1: { 'Gi0/0': 'up', 'Gi0/1': 'up' },
+  R2: { 'Gi0/0': 'up', 'Gi0/1': 'down' },
+  R3: { 'Gi0/0': 'up', 'Gi0/1': 'up' },
+  'LAN-A': { 'VLAN 10': 'up', 'Gi1/0/1': 'up', 'Gi1/0/2': 'down' },
+  'LAN-B': { 'VLAN 20': 'up', 'Gi1/0/3': 'up' },
+  'LAN-C': { 'VLAN 30': 'up', 'Gi1/0/4': 'admin-down' },
+  ISP: { 'Gi0/0': 'up', 'Gi0/1': 'up' },
+  'Backup ISP': { 'Gi0/0': 'up', 'Gi0/1': 'down' },
+  Internet: { Lo0: 'up', 'Te0/0': 'up' },
+}
+
 const routeLabRoutes: RouteEntry[] = [
   {
     prefix: '10.10.1.128/25',
@@ -266,9 +373,19 @@ function App() {
   const [routeDestination, setRouteDestination] = useState(routeLabScenarios['LPM default test'].destination)
   const [routeMatches, setRouteMatches] = useState<RouteEntry[]>([])
   const [routeWinner, setRouteWinner] = useState<RouteEntry | null>(null)
+  const [selectedRoutePrefix, setSelectedRoutePrefix] = useState<string | null>(null)
   const [routeSummary, setRouteSummary] = useState('Choose a scenario and click Analyze Route.')
   const [routeDetail, setRouteDetail] = useState('Longest-prefix-match rules are applied before AD and metric evaluation.')
   const [ospfScenario, setOspfScenario] = useState<OSPFScenarioKey>('Backbone and ABR')
+  const [selectedLsa, setSelectedLsa] = useState<string | null>(null)
+  const [selectedDevice, setSelectedDevice] = useState<string>('R1')
+  const [resultSummary, setResultSummary] = useState<{
+    score: number
+    percentage: number
+    correct: number
+    answered: number
+    difficulty: string
+  } | null>(null)
 
   const currentQuestion = questions[currentIndex]
 
@@ -306,10 +423,25 @@ function App() {
     localStorage.setItem('routing-learning-settings', JSON.stringify(settings))
   }, [settings])
 
+  useEffect(() => {
+    if (routeWinner && !selectedRoutePrefix) {
+      setSelectedRoutePrefix(routeWinner.prefix)
+    }
+  }, [routeWinner, selectedRoutePrefix])
+
+  useEffect(() => {
+    setSelectedLsa(ospfLabScenarios[ospfScenario].lsa_rows[0]?.lsa ?? null)
+  }, [ospfScenario])
+
   const totalQuestions = questions.length
   const currentProgress = totalQuestions ? Math.round(((currentIndex + 1) / totalQuestions) * 100) : 0
   const accuracy = answeredCount ? Math.round((correctCount / answeredCount) * 100) : 0
   const incorrectCount = questions.length ? Math.max(0, answeredCount - correctCount) : 0
+  const selectedRoute = routeMatches.find((route) => route.prefix === selectedRoutePrefix) ?? routeWinner
+  const selectedLsaDetail = ospfLabScenarios[ospfScenario].lsa_rows.find((row) => row.lsa === selectedLsa) ?? ospfLabScenarios[ospfScenario].lsa_rows[0]
+  const activeDevice = topologyDevices[selectedDevice] ?? topologyDevices.R1
+  const selectedDevicePath = selectedRoute?.path ?? []
+  const selectedDeviceInterfaceState = topologyInterfaceState[selectedDevice] ?? {}
 
   const updateSetting = <K extends keyof typeof defaultSettings>(key: K, value: (typeof defaultSettings)[K]) => {
     setSettings((previous) => ({ ...previous, [key]: value }))
@@ -384,6 +516,7 @@ function App() {
     setSelectedAnswer(null)
     setShowHint(settings.showHintsByDefault)
     setShowExplanation(false)
+    setResultSummary(null)
     setStatusMessage(`Quiz started: ${selected.length} ${difficulty} questions.`)
     setActiveTab('Quiz')
   }
@@ -417,14 +550,23 @@ function App() {
       date: new Date().toISOString(),
     }
 
+    const nextSummary = {
+      score,
+      percentage,
+      correct: correctCount,
+      answered: answeredCount || totalQuestions,
+      difficulty,
+    }
+
     setHistory((previous) => [entry, ...previous].slice(0, 20))
+    setResultSummary(nextSummary)
     setQuestions([])
     setCurrentIndex(0)
     setSelectedAnswer(null)
     setShowHint(false)
     setShowExplanation(false)
     setStatusMessage(`Finished with ${percentage}% in ${difficulty}.`)
-    setActiveTab('History')
+    setActiveTab('Quiz')
   }
 
   const nextQuestion = () => {
@@ -461,6 +603,7 @@ function App() {
     setSelectedAnswer(null)
     setShowHint(settings.showHintsByDefault)
     setShowExplanation(false)
+    setResultSummary(null)
     setStatusMessage(`Review mode: ${reviewQuestions.length} missed questions.`)
     setActiveTab('Quiz')
   }
@@ -480,11 +623,14 @@ function App() {
     setSelectedAnswer(null)
     setShowHint(settings.showHintsByDefault)
     setShowExplanation(false)
+    setResultSummary(null)
     setStatusMessage(`Re-started the current ${difficulty} round.`)
   }
 
+  const appClassName = settings.compactMode ? 'app-shell compact-mode' : 'app-shell'
+
   return (
-    <div className="app-shell">
+    <div className={appClassName}>
       <aside className="sidebar">
         <div className="brand-block">
           <div className="brand-mark">R</div>
@@ -547,6 +693,14 @@ function App() {
                 />
                 Show hints
               </label>
+              <label className="toggle-row">
+                <input
+                  type="checkbox"
+                  checked={settings.compactMode}
+                  onChange={(event) => updateSetting('compactMode', event.target.checked)}
+                />
+                Compact mode
+              </label>
             </div>
             <button type="button" className="primary-button" onClick={startQuiz}>
               Start Quiz
@@ -600,7 +754,38 @@ function App() {
                 <span className="tag">{currentQuestion?.difficulty ?? 'Ready'}</span>
               </div>
 
-              {currentQuestion ? (
+              {resultSummary && !currentQuestion ? (
+                <div className="result-panel">
+                  <h3>Quiz results</h3>
+                  <div className="result-score">{resultSummary.percentage}%</div>
+                  <ul className="summary-list">
+                    <li>
+                      <span>Score</span>
+                      <strong>{resultSummary.score}</strong>
+                    </li>
+                    <li>
+                      <span>Correct</span>
+                      <strong>{resultSummary.correct}</strong>
+                    </li>
+                    <li>
+                      <span>Answered</span>
+                      <strong>{resultSummary.answered}</strong>
+                    </li>
+                    <li>
+                      <span>Difficulty</span>
+                      <strong>{resultSummary.difficulty}</strong>
+                    </li>
+                  </ul>
+                  <div className="mini-actions">
+                    <button type="button" className="primary-button small" onClick={startQuiz}>
+                      Run again
+                    </button>
+                    <button type="button" className="secondary-button" onClick={() => setActiveTab('History')}>
+                      View history
+                    </button>
+                  </div>
+                </div>
+              ) : currentQuestion ? (
                 <>
                   <div className="question-meta">
                     <strong>
@@ -790,12 +975,14 @@ function App() {
                     const segments = route.path.slice(0, -1).map((nodeName, index) => {
                       const start = routeNodeMap[nodeName]
                       const end = routeNodeMap[route.path[index + 1]]
+                      const isHighlight = !!selectedRoute && selectedRoute.path.includes(start.id) && selectedRoute.path.includes(end.id)
                       return {
                         x1: start.x,
                         y1: start.y,
                         x2: end.x,
                         y2: end.y,
                         color: route.color,
+                        highlight: isHighlight,
                       }
                     })
                     return segments
@@ -808,20 +995,59 @@ function App() {
                       x2={segment.x2}
                       y2={segment.y2}
                       stroke={segment.color}
-                      strokeWidth={4}
+                      strokeWidth={segment.highlight ? 6 : 4}
+                      strokeOpacity={segment.highlight || !selectedRoute ? 1 : 0.45}
                     />
                   ))}
               </svg>
 
               {routeNodes.map((node) => (
-                <div
+                <button
                   key={node.id}
-                  className={`route-node ${node.id === 'Edge' ? 'edge' : node.id.includes('LAN') || node.id === 'Internet' ? 'lan' : 'router'}`}
+                  type="button"
+                  className={`route-node ${node.id === 'Edge' ? 'edge' : node.id.includes('LAN') || node.id === 'Internet' ? 'lan' : 'router'} ${selectedDevice === node.id ? 'selected-device' : ''}`}
                   style={{ left: `${node.x}px`, top: `${node.y}px` }}
+                  onClick={() => setSelectedDevice(node.id)}
                 >
                   {node.id}
-                </div>
+                </button>
               ))}
+            </div>
+
+            <div className="device-inspector">
+              <div className="device-header">
+                <div>
+                  <p className="eyebrow">Selected device</p>
+                  <h4>{selectedDevice}</h4>
+                </div>
+                <span className={`device-pill ${activeDevice.type}`}>{activeDevice.type}</span>
+              </div>
+              <div className="device-details">
+                <span>
+                  <strong>Role:</strong> {activeDevice.role}
+                </span>
+                <span>
+                  <strong>IP:</strong> {activeDevice.ip}
+                </span>
+                <span>
+                  <strong>Neighbors:</strong> {activeDevice.neighbors.join(', ')}
+                </span>
+                <span>
+                  <strong>Route path:</strong> {selectedDevicePath.length ? selectedDevicePath.join(' → ') : 'No route in focus'}
+                </span>
+              </div>
+              <div className="inline-list">
+                {activeDevice.interfaces.map((interfaceName) => {
+                  const state = selectedDeviceInterfaceState[interfaceName] ?? 'up'
+                  const statusClass = state === 'up' ? 'status-up' : state === 'down' ? 'status-down' : 'status-warning'
+                  return (
+                    <span key={interfaceName} className={`status-pill ${statusClass}`}>
+                      {interfaceName} · {state}
+                    </span>
+                  )
+                })}
+              </div>
+              <p className="device-note">{activeDevice.note}</p>
             </div>
 
             <div className="route-analysis">
@@ -838,7 +1064,11 @@ function App() {
                 </thead>
                 <tbody>
                   {routeMatches.map((route) => (
-                    <tr key={route.prefix} className={routeWinner?.prefix === route.prefix ? 'winner' : ''}>
+                    <tr
+                      key={route.prefix}
+                      className={routeWinner?.prefix === route.prefix || selectedRoutePrefix === route.prefix ? 'winner selected-row' : ''}
+                      onClick={() => setSelectedRoutePrefix(route.prefix)}
+                    >
                       <td>{route.prefix}</td>
                       <td>{route.protocol}</td>
                       <td>{route.ad}</td>
@@ -847,6 +1077,19 @@ function App() {
                   ))}
                 </tbody>
               </table>
+              {selectedRoute && (
+                <div className="drill-card">
+                  <h4>{selectedRoute.prefix}</h4>
+                  <p>
+                    {selectedRoute.protocol} via {selectedRoute.next_hop} on {selectedRoute.interface}.
+                  </p>
+                  <div className="drill-meta">
+                    <span>AD: {selectedRoute.ad}</span>
+                    <span>Metric: {selectedRoute.metric}</span>
+                    <span>Path: {selectedRoute.path.join(' → ')}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -855,8 +1098,8 @@ function App() {
           <section className="lab-preview">
             <div className="lab-header">
               <div>
-                <p className="eyebrow">Area behavior</p>
-                <h3>OSPF concepts</h3>
+                <p className="eyebrow">Area analysis</p>
+                <h3>OSPF behavior</h3>
               </div>
               <span className="tag neutral">OSPF Lab</span>
             </div>
@@ -888,14 +1131,43 @@ function App() {
                 <span>Area 1</span>
               </div>
 
-              <div className={`ospf-node ospf-r1 ${ospfLabScenarios[ospfScenario].highlight.includes('R1') ? 'highlighted' : ''}`}>R1</div>
-              <div className={`ospf-node ospf-r2 ${ospfLabScenarios[ospfScenario].highlight.includes('R2 ABR') ? 'highlighted' : ''}`}>R2 ABR</div>
-              <div className={`ospf-node ospf-r3 ${ospfLabScenarios[ospfScenario].highlight.includes('R3') ? 'highlighted' : ''}`}>R3</div>
-              <div className={`ospf-node ospf-r4 ${ospfLabScenarios[ospfScenario].highlight.includes('R4') ? 'highlighted' : ''}`}>R4</div>
-              <div className={`ospf-node ospf-r5 ${ospfLabScenarios[ospfScenario].highlight.includes('R5') ? 'highlighted' : ''}`}>R5</div>
-              <div className={`ospf-node ospf-lan0 ${ospfLabScenarios[ospfScenario].highlight.includes('LAN0') ? 'highlighted' : ''}`}>LAN0</div>
-              <div className={`ospf-node ospf-lan1 ${ospfLabScenarios[ospfScenario].highlight.includes('LAN1') ? 'highlighted' : ''}`}>LAN1</div>
-              <div className={`ospf-node ospf-asbr ${ospfLabScenarios[ospfScenario].highlight.includes('ASBR') ? 'highlighted' : ''}`}>ASBR</div>
+              <button type="button" className={`ospf-node ospf-r1 ${ospfLabScenarios[ospfScenario].highlight.includes('R1') ? 'highlighted' : ''} ${selectedDevice === 'R1' ? 'selected-device' : ''}`} onClick={() => setSelectedDevice('R1')}>R1</button>
+              <button type="button" className={`ospf-node ospf-r2 ${ospfLabScenarios[ospfScenario].highlight.includes('R2 ABR') ? 'highlighted' : ''} ${selectedDevice === 'R2 ABR' ? 'selected-device' : ''}`} onClick={() => setSelectedDevice('R2 ABR')}>R2 ABR</button>
+              <button type="button" className={`ospf-node ospf-r3 ${ospfLabScenarios[ospfScenario].highlight.includes('R3') ? 'highlighted' : ''} ${selectedDevice === 'R3' ? 'selected-device' : ''}`} onClick={() => setSelectedDevice('R3')}>R3</button>
+              <button type="button" className={`ospf-node ospf-r4 ${ospfLabScenarios[ospfScenario].highlight.includes('R4') ? 'highlighted' : ''} ${selectedDevice === 'R4' ? 'selected-device' : ''}`} onClick={() => setSelectedDevice('R4')}>R4</button>
+              <button type="button" className={`ospf-node ospf-r5 ${ospfLabScenarios[ospfScenario].highlight.includes('R5') ? 'highlighted' : ''} ${selectedDevice === 'R5' ? 'selected-device' : ''}`} onClick={() => setSelectedDevice('R5')}>R5</button>
+              <button type="button" className={`ospf-node ospf-lan0 ${ospfLabScenarios[ospfScenario].highlight.includes('LAN0') ? 'highlighted' : ''} ${selectedDevice === 'LAN0' ? 'selected-device' : ''}`} onClick={() => setSelectedDevice('LAN0')}>LAN0</button>
+              <button type="button" className={`ospf-node ospf-lan1 ${ospfLabScenarios[ospfScenario].highlight.includes('LAN1') ? 'highlighted' : ''} ${selectedDevice === 'LAN1' ? 'selected-device' : ''}`} onClick={() => setSelectedDevice('LAN1')}>LAN1</button>
+              <button type="button" className={`ospf-node ospf-asbr ${ospfLabScenarios[ospfScenario].highlight.includes('ASBR') ? 'highlighted' : ''} ${selectedDevice === 'ASBR' ? 'selected-device' : ''}`} onClick={() => setSelectedDevice('ASBR')}>ASBR</button>
+            </div>
+
+            <div className="device-inspector">
+              <div className="device-header">
+                <div>
+                  <p className="eyebrow">Selected device</p>
+                  <h4>{selectedDevice}</h4>
+                </div>
+                <span className={`device-pill ${topologyDevices[selectedDevice]?.type ?? 'router'}`}>{topologyDevices[selectedDevice]?.type ?? 'router'}</span>
+              </div>
+              <div className="device-details">
+                <span>
+                  <strong>Role:</strong> {topologyDevices[selectedDevice]?.role ?? 'Core network element'}
+                </span>
+                <span>
+                  <strong>IP:</strong> {topologyDevices[selectedDevice]?.ip ?? 'Not assigned'}
+                </span>
+                <span>
+                  <strong>Neighbors:</strong> {topologyDevices[selectedDevice]?.neighbors?.join(', ') ?? 'None'}
+                </span>
+              </div>
+              <div className="inline-list">
+                {(topologyDevices[selectedDevice]?.interfaces ?? []).map((interfaceName) => (
+                  <span key={interfaceName} className="pill neutral">
+                    {interfaceName}
+                  </span>
+                ))}
+              </div>
+              <p className="device-note">{topologyDevices[selectedDevice]?.note ?? 'This device is part of the OSPF lab scenario.'}</p>
             </div>
 
             <div className="route-analysis ospf-analysis">
@@ -920,7 +1192,11 @@ function App() {
                 </thead>
                 <tbody>
                   {ospfLabScenarios[ospfScenario].lsa_rows.map((row) => (
-                    <tr key={`${ospfScenario}-${row.lsa}-${row.source}`}>
+                    <tr
+                      key={`${ospfScenario}-${row.lsa}-${row.source}`}
+                      className={selectedLsa === row.lsa ? 'selected-row' : ''}
+                      onClick={() => setSelectedLsa(row.lsa)}
+                    >
                       <td>{row.lsa}</td>
                       <td>{row.area}</td>
                       <td>{row.source}</td>
@@ -929,6 +1205,17 @@ function App() {
                   ))}
                 </tbody>
               </table>
+
+              {selectedLsaDetail && (
+                <div className="drill-card">
+                  <h4>{selectedLsaDetail.lsa}</h4>
+                  <p>{selectedLsaDetail.meaning}</p>
+                  <div className="drill-meta">
+                    <span>Area: {selectedLsaDetail.area}</span>
+                    <span>Source: {selectedLsaDetail.source}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -937,8 +1224,8 @@ function App() {
           <section className="history-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Score history</p>
-                <h3>Last 20 results</h3>
+                <p className="eyebrow">Progress</p>
+                <h3>Quiz history</h3>
               </div>
             </div>
 
@@ -946,10 +1233,10 @@ function App() {
               {history.length ? (
                 history.map((entry, index) => (
                   <div key={`${entry.date}-${index}`} className="history-entry">
-                    <span>{new Date(entry.date).toLocaleString()}</span>
-                    <strong>{entry.difficulty}</strong>
-                    <span>{entry.score} pts</span>
+                    <strong>{new Date(entry.date).toLocaleDateString()}</strong>
+                    <span>{entry.difficulty}</span>
                     <span>{entry.percentage}%</span>
+                    <span>{entry.score} pts</span>
                   </div>
                 ))
               ) : (

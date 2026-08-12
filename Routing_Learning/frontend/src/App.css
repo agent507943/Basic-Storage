@@ -521,6 +521,8 @@ select {
   font-weight: 700;
   transform: translate(-50%, -50%);
   z-index: 1;
+  cursor: pointer;
+  color: #f8fbff;
 }
 
 .route-node.edge {
@@ -536,6 +538,110 @@ select {
 .route-node.lan {
   background: rgba(168, 85, 247, 0.14);
   border: 1px solid rgba(192, 132, 252, 0.5);
+}
+
+.route-node.selected-device,
+.ospf-node.selected-device {
+  box-shadow: 0 0 0 2px rgba(125, 211, 252, 0.9), 0 0 18px rgba(56, 189, 248, 0.45);
+  border-color: rgba(125, 211, 252, 1);
+}
+
+.device-inspector {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  display: grid;
+  gap: 14px;
+}
+
+.device-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.device-header h4 {
+  margin: 0;
+  color: #f8fbff;
+  font-size: 1.2rem;
+}
+
+.device-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.device-pill.router {
+  background: rgba(52, 211, 153, 0.14);
+  color: #a7f3d0;
+  border: 1px solid rgba(52, 211, 153, 0.5);
+}
+
+.device-pill.switch {
+  background: rgba(192, 132, 252, 0.14);
+  color: #e9d5ff;
+  border: 1px solid rgba(192, 132, 252, 0.45);
+}
+
+.device-details {
+  display: grid;
+  gap: 8px;
+  color: #dbeafe;
+}
+
+.device-details strong {
+  color: #f8fbff;
+}
+
+.inline-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: lowercase;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.status-up {
+  background: rgba(52, 211, 153, 0.11);
+  color: #a7f3d0;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.status-down {
+  background: rgba(248, 113, 113, 0.12);
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+.status-warning {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fef3c7;
+  border-color: rgba(251, 191, 36, 0.45);
+}
+
+.device-note {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.55;
 }
 
 .route-analysis {
@@ -568,13 +674,69 @@ select {
   vertical-align: top;
 }
 
-.route-table tr.winner {
+.route-table tr.winner,
+.ospf-table tr.selected-row,
+.route-table tr.selected-row {
   background: rgba(59, 130, 246, 0.12);
 }
 
 .ospf-table tbody tr:hover,
 .route-table tbody tr:hover {
   background: rgba(59, 130, 246, 0.08);
+}
+
+.result-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.result-panel h3 {
+  margin: 0;
+  color: #f8fbff;
+}
+
+.result-score {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #7dd3fc;
+}
+
+.drill-card {
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.drill-card h4 {
+  margin: 0 0 10px;
+  color: #f8fbff;
+}
+
+.drill-card p {
+  margin: 0 0 12px;
+  color: #dbeafe;
+}
+
+.drill-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #bfdbfe;
+  font-size: 0.82rem;
+}
+
+.compact-mode .content-panel {
+  padding: 20px;
+}
+
+.compact-mode .stats-grid {
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+}
+
+.compact-mode .study-grid {
+  grid-template-columns: 1fr;
 }
 
 .ospf-layout {
@@ -621,6 +783,7 @@ select {
   background: rgba(35, 48, 68, 0.9);
   border: 1px solid rgba(122, 162, 247, 0.6);
   color: #e2e8f0;
+  cursor: pointer;
 }
 
 .ospf-node.highlighted {
